@@ -1,0 +1,14 @@
+- name: change selinx setting to allow haproxy to connect to any port
+  become: yes
+  shell:
+    cmd: "setsebool -P haproxy_connect_any=1"
+
+- name: run haproxy
+  become: yes
+  shell:
+    cmd: systemctl start haproxy
+
+- name: enable haproxy
+  become: yes
+  shell:
+    cmd: systemctl enable haproxy

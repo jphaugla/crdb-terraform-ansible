@@ -1,0 +1,32 @@
+- name: init crdb
+  shell:
+    cmd: "cockroach init --certs-dir=certs" 
+  ignore_errors: true
+
+- name: copy systems location sql script
+  copy:
+    src: system_locations.sql
+    dest: system_locations.sql    
+
+- name: copy create user sql script
+  template:
+    src: create_user.j2
+    dest: create_user.sql    
+
+#  ignore errors because of retry.  
+- name: install system locations
+  shell:
+    cmd: "cockroach sql --certs-dir=certs --file=system_locations.sql"
+  ignore_errors: true
+
+- name: create admin user
+  shell:
+    cmd: "cockroach sql --certs-dir=certs --file=create_user.sql"
+
+- name: add enterprise license 
+  include_tasks: install_enterprise_keys.yml
+  when:
+    - install_enterprise_keys|bool
+
+- name: enable rangefeed
+  command: "{{ lookup('template','enable-rangefeed.j2') }}"

@@ -1,0 +1,26 @@
+- name: make log replicator directory
+  become: yes
+  file: 
+    path: "{{ crdb_file_location }}/{{ admin_username }}/logs/replicator"
+    state: directory
+    mode: '0777'
+    owner: adminuser
+    group: adminuser
+
+- name: make app log directory
+  become: yes
+  file: 
+    path: "{{ crdb_file_location }}/{{ admin_username }}/logs/bank-app"
+    state: directory
+    mode: '0777'
+    owner: adminuser
+    group: adminuser
+
+- name: Create a directory if it does not exist
+  become: yes
+  file:
+    path: /opt
+    state: directory
+    mode: '0755'
+    owner: adminuser
+    group: adminuser

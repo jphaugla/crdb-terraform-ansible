@@ -1,0 +1,75 @@
+- hosts: all_public_node_ips
+  gather_facts: True
+  roles:
+    - common
+- hosts: haproxy_node_ips
+  gather_facts: True
+  roles:
+    - haproxy-node
+- hosts: crdb_node_ips
+  gather_facts: True
+  roles:
+    - crdb-node
+- hosts: crdb_node_ips_0
+  gather_facts: True
+  roles:
+    - crdb-node-0
+- hosts: app_node_ips
+  gather_facts: True
+  roles:
+    - app-node
+- hosts: app_node_ips
+  gather_facts: True
+  roles:
+    - replicator-molt
+- hosts: haproxy_node_ips
+  gather_facts: True
+  roles:
+    - app-prometheus
+- hosts: kafka_node_ips
+  gather_facts: false
+  become: yes
+  become_user: root
+  become_method: sudo
+  pre_tasks:
+  - name: Update Apt Cache
+    apt: update_cache=yes
+    when: include_kafka == "yes"
+  - name: Ubuntu Packages
+    when: include_kafka == "yes"
+    package:
+      pkg:
+        - build-essential
+        - autoconf
+        - automake
+        - default-jre
+        - libbsd-dev
+        - libltdl-dev
+        - libltdl7
+        - libtool
+        - libpcre3-dev
+        - libevent-dev
+        - pkg-config
+        - zlib1g-dev
+        - libssl-dev
+        - nginx
+        - unzip
+  - name: Set to Realistic Hostname
+    when: include_kafka == "yes"
+    hostname:
+      name: "kafka"
+  - name: Setup Hostsfile
+    when: include_kafka == "yes"
+    lineinfile:
+      dest: /etc/hosts
+      regexp: '^127\.0\.0\.1[ \t]+localhost'
+      line: "127.0.0.1 localhost kafka"
+      state: present
+  handlers:
+  - name: restart_nginx
+    when: include_kafka == "yes"
+    service:
+      name: nginx
+      state: restarted
+  roles:
+    - kafka-node

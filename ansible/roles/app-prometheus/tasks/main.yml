@@ -1,0 +1,71 @@
+---
+- name: Preflight
+  ansible.builtin.include_tasks:
+    file: preflight.yml
+    apply:
+      tags:
+        - prometheus_configure
+        - prometheus_install
+        - prometheus_run
+  tags:
+    - prometheus_configure
+    - prometheus_install
+    - prometheus_run
+  when:
+    - preflight|bool
+
+- name: Install
+  ansible.builtin.include_tasks:
+    file: install.yml
+    apply:
+      become: true
+      tags:
+        - prometheus_install
+  tags:
+    - prometheus_install
+  when:
+    - install_prometheus|bool
+
+- name: Configure
+  ansible.builtin.include_tasks:
+    file: configure.yml
+    apply:
+      become: true
+      tags:
+        - prometheus_configure
+  tags:
+    - prometheus_configure
+  when:
+    - configure_prometheus|bool
+
+- name: Ensure prometheus service is started and enabled
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+    name: prometheus
+    state: started
+    enabled: true
+  tags:
+    - prometheus_run
+
+- name: grafana install
+  ansible.builtin.include_tasks:
+    file: install_grafana.yml
+  when:
+    - install_grafana|bool
+
+- name: Ensure grafana service is started and enabled
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+    name: grafana-server
+    state: started
+    # enabled is giving odd Failed to execute /usr/lib/systemd/systemd-sysv-install: No such file or directory
+    # enabled: true
+  tags:
+    - grafana_run
+
+# could not get this to work
+# - name: grafana configure
+#   ansible.builtin.include_tasks:
+#     file: configure_grafana.yml

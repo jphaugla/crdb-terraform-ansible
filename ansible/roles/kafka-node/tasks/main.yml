@@ -1,0 +1,51 @@
+- meta: end_play
+  when: include_kafka != "yes"
+
+- name: gather_facts 
+  setup:
+
+- name: save external and internal ip addresses
+  include_tasks: save-ips.yml
+  when:
+    - save_ips|bool
+
+- name: confluent install
+  include_tasks: confluent-install.yml
+  when:
+    - install_confluent|bool
+
+#  must happen before confluent connect is started or plugins won't be usable until connect restart
+- name: add confluent plug-ins
+  include_tasks: confluent-connect-plug.yml
+  when:
+    - plugin_confluent|bool
+
+- name: confluent property file cretion
+  include_tasks: confluent-properties.yml
+  when:
+    - create_confluent_properties|bool
+
+- name: create der certs
+  include_tasks: create-der-certs.yml
+  when:
+    - create_der_certs|bool
+
+- name: confluent start
+  include_tasks: confluent-start.yml
+  when:
+    - start_confluent|bool
+
+- name: wait until connect is active
+  become: yes
+  command: curl -X GET "{{connect_endpoint}}"
+  retries: 20
+  delay: 10
+  register: result
+  until: result.rc == 0
+  when:
+    - start_confluent|bool
+
+- name: add confluent connectors
+  include_tasks: confluent-add-connectors.yml
+  when:
+    - add_connectors|bool

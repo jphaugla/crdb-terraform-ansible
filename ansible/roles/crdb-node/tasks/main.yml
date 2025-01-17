@@ -1,0 +1,29 @@
+- name: save external and internal ip addresses
+  include_tasks: save-ips.yml
+  when:
+    - save_ips|bool
+
+- name: format the disks
+  include_tasks: format-disks.yml
+  when:
+    - format_disks|bool
+
+- name: generate certificates needed for crdb
+  include_tasks: gen-certs.yml
+  when:
+    - gen_certs|bool
+
+- name: disable firewalld
+  include_tasks: firewalld.yml
+  when:
+    - firewalld|bool
+
+- name: start crdb on this node
+  include_tasks: start-crdb.yml
+  when:
+    - start_crdb|bool
+
+- name: create changefeed scripts
+  include_tasks: changefeed.yml
+  when:
+    - changefeed|bool

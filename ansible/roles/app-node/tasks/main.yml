@@ -1,0 +1,76 @@
+- name: save external and internal ip addresses
+  include_tasks: save-ips.yml
+  when:
+    - save_ips|bool
+
+- meta: end_play
+  when: include_app != "yes"
+
+- name: create log directories
+  include_tasks: create-dirs.yml
+
+- name: install java maven and go
+  include_tasks: install-java-maven-go.yml
+  when:
+    - install_java_maven_go|bool
+
+- name: install molt and replicator
+  include_tasks: install-molt-replicator.yml
+  when:
+    - install_molt_replicator|bool
+
+- name: install dbworkload
+  include_tasks: install-dbworkload.yml
+  when:
+    - install_dbworkload|bool
+
+- name: install git
+  include_tasks: install-git.yml
+  when:
+    - add_githubs|bool
+
+- name: add githubs
+  include_tasks: add-githubs.yml
+  when:
+    - add_githubs|bool
+
+- name: package java application
+  include_tasks: package-java-app.yml
+  when:
+    - package_java_app|bool
+
+- name: install nodejs and typescript
+  include_tasks: install-nodejs-typescript.yml
+  when:
+    - install_nodejs_typescript|bool
+
+- name: install sysbench
+  include_tasks: install-sysbench.yml
+  when:
+    - install_sysbench|bool
+
+- name: create der certs
+  include_tasks: create-der-certs.yml
+  when:
+    - create_der_certs|bool
+
+- name: start java application
+  include_tasks: start-java-app.yml
+  when:
+    - start_java_app|bool
+
+- name: copy kv-workload script
+  ansible.builtin.template:
+    src: kv-workload.j2
+    dest: kv-workload.sh
+    owner: adminuser
+    group: adminuser
+    mode: '0755'
+
+- name: copy sql script
+  ansible.builtin.template:
+    src: sql.j2
+    dest: sql.sh
+    owner: adminuser
+    group: adminuser
+    mode: '0755'

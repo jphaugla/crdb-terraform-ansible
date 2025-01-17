@@ -1,0 +1,11 @@
+- name: Install the latest version haproxy
+  become: yes
+  yum:
+    name: haproxy
+    state: latest
+
+- name: set up haproxy.cfg file
+  become: yes
+  template:
+    src: haproxy.j2
+    dest: /etc/haproxy/haproxy.cfg
