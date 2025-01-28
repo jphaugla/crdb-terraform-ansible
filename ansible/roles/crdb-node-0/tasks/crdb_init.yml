@@ -1,0 +1,4 @@
+- name: init crdb
+  shell:
+    cmd: "cockroach init --certs-dir=certs" 
+  ignore_errors: true

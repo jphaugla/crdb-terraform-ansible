@@ -53,7 +53,7 @@
 # Regions
 # ----------------------------------------
     # Needed for the multi-region-demo
-    variable "aws_region_01" {
+    variable "virtual_network_location" {
       description = "AWS region"
       type        = string
       default     = "us-east-2"
@@ -112,11 +112,28 @@
       default     = "0.0.0.0"
     }
 
+    variable "ssh_private_key" {
+      description = "The full path of the private key"
+      type        = string
+    }
+
 # ----------------------------------------
 # CRDB Instance Specifications
 # ----------------------------------------
     variable "join_string" {
       description = "The CRDB join string to use at start-up.  Do not supply a value"
+      type        = string
+      default     = ""
+    }
+
+    variable "prometheus_string" {
+      description = "The prometheus string to use at start-up.  Do not supply a value"
+      type        = string
+      default     = ""
+    }
+
+    variable "prometheus_app_string" {
+      description = "The  prometheus string to use at start-up.  Do not supply a value"
       type        = string
       default     = ""
     }
@@ -135,6 +152,22 @@
       description = "The AWS instance type for the crdb instances."
       type        = string
       default     = "m7g.xlarge"
+    }
+
+    variable "crdb_file_location" {
+      description = "The mount point for large files.  Subdirectory of adminuser will be added as well"
+      type        = string
+      default     = "/mnt/data"
+    }
+
+    variable "allow_non_tls" {
+      description = "start the nodes with the accept-sql-without-tls flag which is insecure"
+      type        = bool
+      default     = false
+    }
+
+    variable "full_path_license_directory" {
+       description = "full path to the license directory, needs two files cluster_organization and enterprise_lincense in the directory"
     }
 
     variable "crdb_arm_release" {
@@ -211,18 +244,24 @@
       }
     }
 
-    variable "create_admin_user" {
+    variable "create_dbadmin_user" {
       description = "'yes' or 'no' to create an admin user in the database.  This might only makes sense when adding an app instance since the certs will be created and configured automatically for connection to the database."
       type        = string
       default     = "yes"
       validation {
-        condition = contains(["yes", "no"], var.create_admin_user)
+        condition = contains(["yes", "no"], var.create_dbadmin_user)
         error_message = "Valid value for variable 'include_ha_proxy' is : 'yes' or 'no'"        
       }      
     }
 
-    variable "admin_user_name"{
-      description = "An admin with this username will be created if 'create_admin_user=yes'"
+    variable "dbadmin_user_name"{
+      description = "An admin with this username will be created if 'create_dbadmin_user=yes'"
+      type        = string
+      default     = ""
+    }
+
+    variable "dbadmin_user_password"{
+      description = "password for the admin user"
       type        = string
       default     = ""
     }
@@ -247,6 +286,26 @@
     }
 
 # ----------------------------------------
+# Kafka Instance Specifications
+# ----------------------------------------
+    variable "include_kafka" {
+      description = "'yes' or 'no' to include an kafka Instance"
+      type        = string
+      default     = "yes"
+      validation {
+        condition = contains(["yes", "no"], var.include_kafka)
+        error_message = "Valid value for variable 'include_kafka' is : 'yes' or 'no'"        
+      }
+    }
+
+    variable "kafka_instance_type" {
+      description = "Kafka Instance Type"
+      type        = string
+      default     = "t3a.small"
+    }
+
+# ----------------------------------------
+# ----------------------------------------
 # APP Instance Specifications
 # ----------------------------------------
     variable "include_app" {
@@ -263,6 +322,16 @@
       description = "App Instance Type"
       type        = string
       default     = "t3a.micro"
+    }
+
+    variable "start_replicator" {
+      description = "'yes' or 'no' to start replicator application"
+      type        = string
+      default     = "yes"
+      validation {
+        condition = contains(["yes", "no"], var.start_replicator)
+        error_message = "Valid value for variable 'start_replicator' is : 'yes' or 'no'"
+      }
     }
 
 # ----------------------------------------
@@ -309,4 +378,52 @@
       description = "tls_private_key.client_keys.private_key_pem -> client.name.key"
       type        = string
       default     = ""
+    }
+
+    variable "instances_inventory_file" {
+        description = "File name to send inventory details for ansible later. this is relative to the calling main.tf file"
+        type        = string
+        default = "../inventory"
+    }
+
+    variable "playbook_working_directory" {
+        description = "Path for the working directory"
+        type        = string
+        default = "../../ansible"
+    }
+
+    variable "playbook_instances_inventory_file" {
+        description = "Path for the playbook command to use for the instances inventory file"
+        type        = string
+        default = "../terraform-aws/inventory"
+    }
+
+    variable "instances_inventory_directory" {
+        description = "Path for the inventory directory, this is relative to playbook_working_directory"
+        type        = string
+        default = "../temp/"
+    }
+
+    variable "inventory_template_file" {
+        description = "File name and Path to for inventory template file."
+        type        = string
+        default = "../terraform-aws/templates/inventory.tpl"
+    }
+
+# ----------------------------------------
+# Network Load Balancer
+# ----------------------------------------
+    variable "include_load_balancer" {
+      description = "'yes' or 'no' to include a load balancer"
+      type        = string
+      default     = "yes"
+      validation {
+        condition = contains(["yes", "no"], var.include_load_balancer)
+        error_message = "Valid value for variable 'include_kafka' is : 'yes' or 'no'"
+      }
+    }
+
+    variable "ansible_verbosity_switch" {
+        description = "Set the about of verbosity to pass through to the ansible playbook command. No additional verbosity by default. Example: -v or -vv or -vvv."
+        default = ""
     }

@@ -47,6 +47,7 @@
     status_code: [200, 201, 204, 404]
 
 - name: create sample transaction to create topic
+  ignore_errors: true
   get_url:
     url: "http://{{lookup('file', './temp/{{region}}/app_internal_ip.txt')}}:8080/api/transaction/save?doKafka=true&accountId=3bb4822a-4a83-42e4-a9cd-ad095d0eaed3"
     validate_certs: false

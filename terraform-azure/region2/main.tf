@@ -35,8 +35,8 @@ module "azure" {
 # ----------------------------------------
 # Existing Key Info
 # ----------------------------------------
-   azure_ssh_key_name           = "jhaugland-centralus"
-   azure_ssh_key_resource_group = "jhaugland-key-central-us"
+   ssh_key_name           = "jhaugland-centralus"
+   ssh_key_resource_group = "jhaugland-key-central-us"
    ssh_private_key              = "~/.ssh/jhaugland-centralus.pem"
    
 # ----------------------------------------
@@ -60,9 +60,9 @@ module "azure" {
 # ----------------------------------------
 # CRDB Admin User - Cert Connection
 # ----------------------------------------
-   create_admin_user          = "yes"
-   admin_user_name            = "jhaugland"
-   admin_user_password        = "jasonrocks"
+   create_dbadmin_user          = "yes"
+   dbadmin_user_name            = "jhaugland"
+   dbadmin_user_password        = "jasonrocks"
 
 # ----------------------------------------
 # CRDB Specifications

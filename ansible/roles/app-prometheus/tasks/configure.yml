@@ -58,7 +58,7 @@
 - name: copy ca.crt for prometheus.yml
   become: true
   ansible.builtin.copy:
-    src: /home/adminuser/certs/ca.crt
+    src: /home/{{login_username}}/certs/ca.crt
     dest: "{{ prometheus_config_dir }}/ca.crt"
     remote_src: yes
     mode: 0640

@@ -17,9 +17,9 @@
 
 - name: create binaries dir
   file:
-    path: /home/adminuser/binaries
-    owner: adminuser
-    group: adminuser
+    path: /home/{{login_username}}/binaries
+    owner: {{login_username}}
+    group: {{login_username}}
     mode: '0755'
     state: directory
 

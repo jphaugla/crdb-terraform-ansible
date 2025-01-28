@@ -1,7 +1,3 @@
-# provider "aws" {
-#   region = var.aws_region_01
-# }
-
 data "aws_availability_zones" "available" {
   state = "available"
 }
@@ -67,6 +63,8 @@ locals {
   # depends_on = [aws_instance.crdb]
   ip_list_public     = join(" ", aws_instance.crdb[*].public_ip)
   join_string_public = (var.join_string != "" ? var.join_string : join(",", aws_instance.crdb[*].public_ip))
+  prometheus_string = (var.prometheus_string != "" ? var.prometheus_string : join(",", formatlist("%s:8080", aws_network_interface.crdb[*].private_ip)))
+  prometheus_app_string = (var.prometheus_app_string != "" ? var.prometheus_app_string : join(",", formatlist("%s:30005", aws_network_interface.app[*].private_ip)))
 }
 
 locals {

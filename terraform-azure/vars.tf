@@ -58,12 +58,12 @@
 # ----------------------------------------
 # Existing Key Info
 # ----------------------------------------
-    variable "azure_ssh_key_name" {
-      description = "The name of an existing ssh key in Microsoft Azure"
+    variable "ssh_key_name" {
+      description = "The name of an existing ssh key "
       type    = string      
     }
-    variable "azure_ssh_key_resource_group" {
-      description = "The name of the resource group containing the existing Microsoft Azure SSH Key"
+    variable "ssh_key_resource_group" {
+      description = "The name of the resource group containing the existing SSH Key"
       type        = string
     }
     variable "ssh_private_key" {
@@ -115,6 +115,14 @@
     }
 
 # ----------------------------------------
+# azure login user name for all the azure compute engine VMs
+# ----------------------------------------
+    variable "login_username" {
+      description = "the login user for the azure compute engine VMs, normally is adminuser"
+      type        = string
+      default     = "adminuser"
+    }
+# ----------------------------------------
 # CRDB Instance Specifications
 # ----------------------------------------
     variable "crdb_vm_size" {
@@ -155,24 +163,24 @@
       }
     }
 # ----------------------------------------
-# CRDB Admin User - Cert Connection
+# CRDB Admin User  - database admin user
 # ----------------------------------------
-    variable "create_admin_user" {
+    variable "create_dbadmin_user" {
       description = "'yes' or 'no' to create an admin user in the database.  This might only makes sense when adding an app instance since the certs will be created and configured automatically for connection to the database."
       type        = string
       default     = "yes"
       validation {
-        condition = contains(["yes", "no"], var.create_admin_user)
-        error_message = "Valid value for variable 'include_ha_proxy' is : 'yes' or 'no'"        
+        condition = contains(["yes", "no"], var.create_dbadmin_user)
+        error_message = "Valid value for variable 'create_dbadmin_user' is : 'yes' or 'no'"        
       }      
     }
-    variable "admin_user_name"{
-      description = "An admin with this username will be created if 'create_admin_user=yes'"
+    variable "dbadmin_user_name"{
+      description = "An database admin with this username will be created if 'create_dbadmin_user=yes'"
       type        = string
       default     = ""
     }
-    variable "admin_user_password"{
-      description = "password for the admin user"
+    variable "dbadmin_user_password"{
+      description = "password for the database admin user"
       type        = string
       default     = ""
     }

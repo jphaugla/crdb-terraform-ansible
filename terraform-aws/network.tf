@@ -153,3 +153,17 @@ resource "aws_network_interface" "haproxy" {
   # when creating network interfaces, the security group must go here, not in the instance config
   security_groups = [module.security-group-02.security_group_id, module.security-group-01.security_group_id]
 }
+resource "aws_network_interface" "app" {
+  tags                  = local.tags
+  count                 = 1
+  subnet_id             = aws_subnet.public_subnets[0].id
+  # when creating network interfaces, the security group must go here, not in the instance config
+  security_groups = [module.security-group-02.security_group_id, module.security-group-01.security_group_id]
+}
+resource "aws_network_interface" "kafka" {
+  tags                  = local.tags
+  count                 = 1
+  subnet_id             = aws_subnet.public_subnets[0].id
+  # when creating network interfaces, the security group must go here, not in the instance config
+  security_groups = [module.security-group-02.security_group_id, module.security-group-01.security_group_id]
+}

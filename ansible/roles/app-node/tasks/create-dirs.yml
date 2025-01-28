@@ -4,8 +4,8 @@
     path: "{{ crdb_file_location }}/{{ admin_username }}/logs/replicator"
     state: directory
     mode: '0777'
-    owner: adminuser
-    group: adminuser
+    owner: {{login_username}}
+    group: {{login_username}}
 
 - name: make app log directory
   become: yes
@@ -13,8 +13,8 @@
     path: "{{ crdb_file_location }}/{{ admin_username }}/logs/bank-app"
     state: directory
     mode: '0777'
-    owner: adminuser
-    group: adminuser
+    owner: {{login_username}}
+    group: {{login_username}}
 
 - name: Create a directory if it does not exist
   become: yes
@@ -22,5 +22,5 @@
     path: /opt
     state: directory
     mode: '0755'
-    owner: adminuser
-    group: adminuser
+    owner: {{login_username}}
+    group: {{login_username}}

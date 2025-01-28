@@ -9,6 +9,9 @@
 - name: create log directories
   include_tasks: create-dirs.yml
 
+- name: install python pip
+  include_tasks: install-python-pip.yml
+
 - name: install java maven and go
   include_tasks: install-java-maven-go.yml
   when:
@@ -63,14 +66,14 @@
   ansible.builtin.template:
     src: kv-workload.j2
     dest: kv-workload.sh
-    owner: adminuser
-    group: adminuser
+    owner: "{{ login_username }}"
+    group: "{{ login_username }}"
     mode: '0755'
 
 - name: copy sql script
   ansible.builtin.template:
     src: sql.j2
     dest: sql.sh
-    owner: adminuser
-    group: adminuser
+    owner: "{{ login_username }}"
+    group: "{{ login_username }}"
     mode: '0755'

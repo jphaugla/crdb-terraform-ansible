@@ -33,10 +33,10 @@ resource "azurerm_linux_virtual_machine" "kafka" {
 
     network_interface_ids = [azurerm_network_interface.kafka[0].id]
 
-    admin_username                  = local.admin_username     # is this still required with an admin_ssh key block?
+    admin_username                  = var.login_username     # is this still required with an admin_ssh key block?
     disable_password_authentication = true
     admin_ssh_key {
-        username                      = local.admin_username    # a bug in the provider requires this to be adminuser
+        username                      = var.login_username    # a bug in the provider requires this to be adminuser
         public_key                    = data.azurerm_ssh_public_key.ssh_key.public_key
   }
 
