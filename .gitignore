@@ -4,6 +4,6 @@ ansible/.DS_Store
 .terraform/
 terraform.tfstate*
 .terraform*
-provisioners/temp
-provisioners/inventory
+ansible/temp
+ansible/inventory
 .idea/
