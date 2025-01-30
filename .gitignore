@@ -6,4 +6,6 @@ terraform.tfstate*
 .terraform*
 ansible/temp
 ansible/inventory
+terraform-aws/inventory
+terraform-azure/inventory
 .idea/

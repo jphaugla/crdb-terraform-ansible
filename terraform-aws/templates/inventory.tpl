@@ -1,5 +1,5 @@
 [kafka_node_ips]
-${kafka_public_ip}
+${kafka_public_ip} ansible_user=ubuntu
 [crdb_node_ips]
 ${crdb_public_ips}
 [crdb_node_ips_0]

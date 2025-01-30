@@ -82,7 +82,7 @@ resource "tls_cert_request" "client_csr" {
 
   subject {
     organization = "Cockroach"
-    common_name = "${local.admin_username}"
+    common_name = "${var.dbadmin_user_name}"
   }
 
   dns_names = ["root"]

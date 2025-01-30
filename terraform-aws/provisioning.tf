@@ -2,7 +2,7 @@
 locals {
   kafka_private_ip       = var.include_kafka == "yes" ? aws_instance.kafka[0].private_ip: "localhost"
   front_end_public_ip    = var.include_load_balancer == "yes" ? aws_lb.public_lb[0].dns_name : aws_instance.haproxy[0].public_ip
-  front_end_private_ip   = var.include_load_balancer == "yes" ? aws_lb.private_lb[0].dns_name : aws_instance.haproxy[0].private_ip
+  front_end_private_ip   = var.include_load_balancer == "yes" ? aws_lb.private_nlb[0].dns_name : aws_instance.haproxy[0].private_ip
 }
 
 # Dummy Resource (fallback)
@@ -13,7 +13,7 @@ resource "null_resource" "lb_dependencies" {
   count = var.include_load_balancer == "yes" ? 1 : 0
   depends_on = [
     aws_lb.public_lb,
-    aws_lb.private_lb
+    aws_lb.private_nlb
   ]
 }
 

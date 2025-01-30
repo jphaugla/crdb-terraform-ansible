@@ -149,24 +149,46 @@ module "security-group-02" {
   vpc_id = aws_vpc.main.id
 }
 
-resource "aws_security_group_rule" "http_from_lb" {
+# allow the load balancer to reach cockroachdb
+resource "aws_security_group_rule" "http_from_vpc" {
   type                     = "ingress"
   from_port                = 8080
   to_port                  = 8080
-  protocol                 = "tcp"
-  source_security_group_id = aws_security_group.lb_security_group.id
+  protocol                 = "http"
+  cidr_blocks              = [var.vpc_cidr]
   description              = "Allow HTTP traffic from Load Balancer"
-  security_group_id        = module.security-group-02.security_group_id # Use the module's output
+  security_group_id        = module.security-group-02.security_group_id 
 }
 
-resource "aws_security_group_rule" "cockroachdb_from_lb" {
+resource "aws_security_group_rule" "cockroachdb_from_vcp" {
   type                     = "ingress"
   from_port                = 26257
   to_port                  = 26257
   protocol                 = "tcp"
-  source_security_group_id = aws_security_group.lb_security_group.id
-  description              = "Allow CockroachDB traffic from Load Balancer"
-  security_group_id        = module.security-group-02.security_group_id # Use the module's output
+  cidr_blocks              = [var.vpc_cidr]
+  description              = "Allow CockroachDB traffic from vpc"
+  security_group_id        = module.security-group-02.security_group_id 
+}
+
+# allow the app node to reach the load balancer
+resource "aws_security_group_rule" "http_to_vpc" {
+  type                     = "ingress"
+  from_port                = 8080
+  to_port                  = 8080
+  protocol                 = "tcp"
+  cidr_blocks              = [var.vpc_cidr]
+  description              = "Allow HTTP traffic to Load Balancer"
+  security_group_id = aws_security_group.lb_security_group.id
+}
+
+resource "aws_security_group_rule" "crdb_to_vpc" {
+  type                     = "ingress"
+  from_port                = 26257
+  to_port                  = 26257
+  protocol                 = "tcp"
+  cidr_blocks              = [var.vpc_cidr]
+  description              = "Allow crdb traffic to Load Balancer"
+  security_group_id = aws_security_group.lb_security_group.id
 }
 
 # Security Group for Load Balancer
