@@ -17,7 +17,7 @@ resource "aws_instance" "crdb" {
     volume_size = var.crdb_root_volume_size
   }
   ebs_block_device {
-    device_name = "/dev/sds"
+    device_name = "/dev/sdb"
     delete_on_termination = true
     encrypted = true
     volume_type = var.crdb_store_volume_type

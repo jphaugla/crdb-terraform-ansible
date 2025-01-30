@@ -19,7 +19,7 @@
 - name: create ca.crt
   copy:
     src: "./temp/{{region}}/tls_cert"
-    dest: /home/"{{ login_username }}"/certs/ca.crt
+    dest: "/home/{{ login_username }}/certs/ca.crt"
     mode: '0400'
 
 - name: create client.db_admin_user.crt

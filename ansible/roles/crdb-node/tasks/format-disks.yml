@@ -75,7 +75,7 @@
 - name: Set ownership and permissions for admin user directory
   become: yes
   file:
-    path: "{{ crdb_file_location }}/{{ admin_username }}"
+    path: "{{ crdb_file_location }}/{{ login_username }}"
     state: directory
-    owner: "{{ admin_username }}"
+    owner: "{{ login_username }}"
     mode: '0755'

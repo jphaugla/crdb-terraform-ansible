@@ -37,6 +37,31 @@ data "aws_ami" "amazon_linux_2023_arm" {
   }
 }
 
+data "aws_ami" "ubuntu_22_04_gen2" {
+  most_recent = true
+  owners      = ["099720109477"] # Canonical's AWS Account ID
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-2024*"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
+  }
+}
+
 locals {
   required_tags = {
     owner       = var.owner,

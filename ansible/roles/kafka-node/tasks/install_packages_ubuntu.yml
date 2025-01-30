@@ -1,0 +1,22 @@
+- name: Update Apt Cache
+    apt: update_cache=yes
+
+- name: Ubuntu Packages
+    when: include_kafka == "yes"
+    package:
+      pkg:
+        - build-essential
+        - autoconf
+        - automake
+        - default-jre
+        - libbsd-dev
+        - libltdl-dev
+        - libltdl7
+        - libtool
+        - libpcre3-dev
+        - libevent-dev
+        - pkg-config
+        - zlib1g-dev
+        - libssl-dev
+        - nginx
+        - unzip

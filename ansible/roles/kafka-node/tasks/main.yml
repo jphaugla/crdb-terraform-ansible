@@ -9,10 +9,43 @@
   when:
     - save_ips|bool
 
+#  leaving this code here but have converted the ami for kafka node to be ubuntu because the amazon linux 2023 didn't work with confluent/kafka
+
+- name: Debug OS information
+  become: yes
+  debug:
+    msg: >
+      The operating system is {{ ansible_facts['distribution'] }}
+      and the version is {{ ansible_facts['distribution_version'] }}
+
+- name: Set variable if Amazon Linux
+  set_fact:
+    is_amazon_linux: "{{ ansible_facts['distribution'] == 'Amazon' }}"
+
+- name: run package install for non amazon
+  include_tasks: install_packages_ubuntu.yml
+  when:
+    - not is_amazon_linux|bool
+
+- name: run package install for amazon
+  include_tasks: install_packages_amazon.yml
+  when:
+    - is_amazon_linux|bool
+
+- name: confluent install amazon
+  include_tasks: confluent-install-amazon.yml
+  when:
+    - install_confluent|bool
+    - is_amazon_linux|bool
+
 - name: confluent install
   include_tasks: confluent-install.yml
   when:
     - install_confluent|bool
+    - not is_amazon_linux|bool
+
+- name: setup and restart nginx
+  include_tasks: install_nginx.yml
 
 #  must happen before confluent connect is started or plugins won't be usable until connect restart
 - name: add confluent plug-ins

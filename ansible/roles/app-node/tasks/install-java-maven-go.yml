@@ -1,35 +1,89 @@
+- name: Debug OS information
+  become: yes
+  debug:
+    msg: >
+      The operating system is {{ ansible_facts['distribution'] }}
+      and the version is {{ ansible_facts['distribution_version'] }}
+
+- name: Set variable if Amazon Linux
+  set_fact:
+    is_amazon_linux: "{{ ansible_facts['distribution'] == 'Amazon' }}"
+
 - name: Install the latest version of Java 17 openjdk
   become: yes
   yum:
     name: java-17-openjdk
     state: latest
+  when: 
+    - not is_amazon_linux|bool
 
 - name: Install the latest version of Java 17 jre
   become: yes
   yum:
     name: java-17-openjdk-devel
     state: latest
+  when: 
+    - not is_amazon_linux|bool
 
-- name: Install Go
+- name: Install the latest version of Java 17 corretto
+  become: yes
+  yum:
+    name: java-17-amazon-corretto
+    state: latest
+  when: 
+    - is_amazon_linux|bool
+
+- name: Install the latest version of Java 17 corretto
+  become: yes
+  yum:
+    name: java-17-amazon-corretto-devel
+    state: latest
+  when: 
+    - is_amazon_linux|bool
+
+- name: Install Go amazon linux 2023
+  become: yes
+  package:
+    name: golang
+  when: 
+    - is_amazon_linux|bool
+
+- name: Install Go non amazon
   become: yes
   package:
     name: go-toolset
+  when: 
+    - not is_amazon_linux|bool
 
 - name: create binaries dir
   file:
-    path: /home/{{login_username}}/binaries
-    owner: {{login_username}}
-    group: {{login_username}}
+    path: "/home/{{login_username}}/binaries"
+    owner: "{{login_username}}"
+    group: "{{login_username}}"
     mode: '0755'
     state: directory
 
-- name: configure java
+- name: configure java amazon
+  become: yes
+  shell:
+   cmd: |
+     cat <<EOF | sudo tee /etc/profile.d/jdk17.sh
+     export JAVA_HOME=/usr/lib/jvm/java-17-amazon-corretto
+     export PATH=$JAVA_HOME/bin:$PATH
+     EOF
+  when: 
+    - is_amazon_linux|bool
+
+- name: configure java not amazon
   become: yes
   shell:
    cmd: |
      cat <<EOF | sudo tee /etc/profile.d/jdk17.sh
      export JAVA_HOME=/usr/lib/jvm/jre-17-openjdk
+     export PATH=$JAVA_HOME/bin:$PATH
      EOF
+  when: 
+    - not is_amazon_linux|bool
 
 - name: wget maven
   become: yes

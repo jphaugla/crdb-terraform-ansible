@@ -26,9 +26,3 @@
   shell:
     cmd: apt-get install confluent-platform -y
   ignore_errors: true
-
-- name: fix  var log kafka permission for kafka connect 
-  become: yes
-  shell:
-    cmd: chmod 770 /var/log/kafka
-  ignore_errors: yes

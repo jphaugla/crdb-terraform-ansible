@@ -1,43 +1,9 @@
-# Security Group for Load Balancer
-resource "aws_security_group" "lb_security_group" {
-  count = var.include_load_balancer == "yes" ? 1 : 0
-
-  name        = "${var.owner}-${var.project_name}-lb-sg"
-  description = "Security group for Load Balancer"
-  vpc_id      =  aws_vpc.main.id
-
-  ingress {
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 26257
-    to_port     = 26257
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "${var.owner}-${var.project_name}-lb-sg"
-  }
-}
-
 # Public Load Balancer
 resource "aws_lb" "public_lb" {
   count       = var.include_load_balancer == "yes" ? 1 : 0
   name        = "${var.owner}-${var.project_name}-public-lb"
   internal    = false
-  security_groups = [aws_security_group.lb_security_group[0].id]
+  security_groups = [aws_security_group.lb_security_group.id]
   subnets     = aws_subnet.public_subnets[*].id
 
   enable_deletion_protection = false
@@ -52,7 +18,7 @@ resource "aws_lb" "private_lb" {
   count       = var.include_load_balancer == "yes" ? 1 : 0
   name        = "${var.owner}-${var.project_name}-private-lb"
   internal    = true
-  security_groups = [aws_security_group.lb_security_group[0].id]
+  security_groups = [aws_security_group.lb_security_group.id]
   subnets     = aws_subnet.private_subnets[*].id
 
   enable_deletion_protection = false

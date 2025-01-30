@@ -29,13 +29,13 @@ module "my_aws" {
   allow_non_tls              = true
 # HA Proxy
    include_ha_proxy = "yes"
-   haproxy_instance_type = "t3a.micro"
+   haproxy_instance_type = "t3a.large"
 # kafka
    include_kafka = "yes"
-   kafka_instance_type = "t3a.micro"
+   kafka_instance_type = "t3a.xlarge"
 # APP Node
    include_app = "yes"
-   app_instance_type = "t3a.micro"
+   app_instance_type = "t3a.xlarge"
    create_dbadmin_user = "yes"
    start_replicator           = "no"
    dbadmin_user_name          = "jhaugland"

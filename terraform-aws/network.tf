@@ -77,31 +77,60 @@ resource "aws_route_table_association" "private_route_table" {
 # https://registry.terraform.io/modules/terraform-aws-modules/security-group/aws/latest#input_ingress_with_self
 # https://github.com/terraform-aws-modules/terraform-aws-security-group/blob/master/examples/complete/main.tf
 module "security-group-01" {
-  # https://registry.terraform.io/modules/terraform-aws-modules/security-group/aws/latest
   source  = "terraform-aws-modules/security-group/aws"
   version = "4.17.1"
 
-  name = "${var.owner}-${var.project_name}-sg01"
-  description = "Allow desktop access (SSH, RDP, Database, HTTP) to EC2 instances"
-  tags = local.tags
+  name        = "${var.owner}-${var.project_name}-sg01"
+  description = "Allow desktop access (SSH, RDP, Database, HTTP, Kafka) to EC2 instances"
+  tags        = local.tags
+  vpc_id      = aws_vpc.main.id
 
-  # ingress_cidr_blocks = ["var.my_ip_address/32"]
+  # Combine whitelist IPs with my own IP
+  # ingress_cidr_blocks = tolist(concat(var.whitelist_ips, [var.my_ip_address]))
   ingress_cidr_blocks = concat(var.whitelist_ips,["${var.my_ip_address}/32"])
+
   ingress_with_cidr_blocks = [
     {
       from_port   = 26257
       to_port     = 26257
       protocol    = "tcp"
-      description = "Allow cockroach database access from my-ip"
+      description = "Allow CockroachDB access from my IP"
     },
-    { rule = "ssh-tcp" },
-    { rule = "http-8080-tcp" },
-    { rule="rdp-tcp" },
-    { rule="rdp-udp" }
-
+    {
+      rule        = "ssh-tcp"
+      description = "Allow SSH access"
+    },
+    {
+      rule        = "http-8080-tcp"
+      description = "Allow HTTP access on port 8080"
+    },
+    {
+      from_port   = 3389
+      to_port     = 3389
+      protocol    = "tcp"
+      description = "Allow RDP over TCP"
+    },
+    {
+      from_port   = 3389
+      to_port     = 3389
+      protocol    = "udp"
+      description = "Allow RDP over UDP"
+    },
+    {
+      from_port   = 9021
+      to_port     = 9021
+      protocol    = "tcp"
+      description = "Allow Confluent Control Center access"
+    },
+    {
+      from_port   = 8083
+      to_port     = 8083
+      protocol    = "tcp"
+      description = "Allow Kafka Connect access"
+    }
   ]
+
   egress_rules = ["all-all"]
-  vpc_id = aws_vpc.main.id
 }
 
 module "security-group-02" {
@@ -118,6 +147,59 @@ module "security-group-02" {
   # This creates a rule to allow all egress 
   egress_rules = ["all-all"]
   vpc_id = aws_vpc.main.id
+}
+
+resource "aws_security_group_rule" "http_from_lb" {
+  type                     = "ingress"
+  from_port                = 8080
+  to_port                  = 8080
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.lb_security_group.id
+  description              = "Allow HTTP traffic from Load Balancer"
+  security_group_id        = module.security-group-02.security_group_id # Use the module's output
+}
+
+resource "aws_security_group_rule" "cockroachdb_from_lb" {
+  type                     = "ingress"
+  from_port                = 26257
+  to_port                  = 26257
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.lb_security_group.id
+  description              = "Allow CockroachDB traffic from Load Balancer"
+  security_group_id        = module.security-group-02.security_group_id # Use the module's output
+}
+
+# Security Group for Load Balancer
+resource "aws_security_group" "lb_security_group" {
+
+  name        = "${var.owner}-${var.project_name}-lb-sg"
+  description = "Security group for Load Balancer"
+  vpc_id      =  aws_vpc.main.id
+
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 26257
+    to_port     = 26257
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.owner}-${var.project_name}-lb-sg"
+  }
 }
 
 # AWS Network Interfaces - 1 Per CRDB Node

@@ -1,0 +1,30 @@
+- name: Install wget
+  ansible.builtin.dnf:
+    name: wget
+    state: present
+
+- name: Install Confluent key
+  shell:
+    cmd: |
+      wget -qO - https://packages.confluent.io/rpm/{{ confluent_folder }}/archive.key | sudo tee /etc/pki/rpm-gpg/RPM-GPG-KEY-confluent
+    creates: /etc/pki/rpm-gpg/RPM-GPG-KEY-confluent
+
+- name: Add Confluent repository
+  copy:
+    dest: /etc/yum.repos.d/confluent.repo
+    content: |
+      [Confluent]
+      name=Confluent repository
+      baseurl=https://packages.confluent.io/rpm/{{ confluent_folder }}/
+      enabled=1
+      gpgcheck=1
+      gpgkey=https://packages.confluent.io/rpm/{{ confluent_folder }}/archive.key
+
+- name: Update DNF cache
+  ansible.builtin.dnf:
+    update_cache: yes
+
+- name: Install Confluent Platform
+  ansible.builtin.dnf:
+    name: confluent-platform
+    state: present

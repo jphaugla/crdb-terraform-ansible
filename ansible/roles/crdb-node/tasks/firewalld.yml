@@ -1,8 +1,10 @@
 - name: stop firewalld
   become: yes
+  ignore_errors: yes
   shell:
     cmd: "systemctl stop firewalld"
 - name: disable firewalld
+  ignore_errors: yes
   become: yes
   shell:
     cmd: "systemctl disable firewalld"

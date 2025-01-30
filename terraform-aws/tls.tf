@@ -6,6 +6,26 @@ locals {
   tls_user_key    = coalesce(var.tls_user_key, tls_private_key.client_keys.private_key_pem)
 }
 
+resource "local_file" "write_tls_cert" {
+   filename = "${var.playbook_working_directory}/temp/${var.virtual_network_location}/tls_cert"
+   content = local.tls_cert
+}
+resource "local_file" "write_tls_user_cert" {
+   filename = "${var.playbook_working_directory}/temp/${var.virtual_network_location}/tls_user_cert"
+   content = local.tls_user_cert
+}
+resource "local_file" "write_tls_user_key" {
+   filename = "${var.playbook_working_directory}/temp/${var.virtual_network_location}/tls_user_key"
+   content = local.tls_user_key
+}
+resource "local_file" "write_tls_private_key" {
+   filename = "${var.playbook_working_directory}/temp/${var.virtual_network_location}/tls_private_key"
+   content = local.tls_private_key
+}
+resource "local_file" "write_tls_public_key" {
+   filename = "${var.playbook_working_directory}/temp/${var.virtual_network_location}/tls_public_key"
+   content = local.tls_public_key
+}
 
 # -----------------------------------------------------------------------
 #  CRDB Keys and ca.crt

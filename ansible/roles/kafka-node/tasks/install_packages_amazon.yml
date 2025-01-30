@@ -1,0 +1,41 @@
+- name: Download and install EPEL repo configuration
+  when: include_kafka == "yes"
+  ansible.builtin.get_url:
+    url: https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+    dest: /tmp/epel-release-latest-9.noarch.rpm
+
+# - name: Install EPEL repository
+#   when: include_kafka == "yes"
+#   ansible.builtin.rpm_key:
+#     state: present
+#     key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9
+
+# - name: Install EPEL repository package
+#   when: include_kafka == "yes"
+#   ansible.builtin.dnf:
+#     name: /tmp/epel-release-latest-9.noarch.rpm
+#     state: present
+
+# - name: Enable EPEL repository
+#   when: include_kafka == "yes"
+#   ansible.builtin.dnf:
+#     name: epel-release
+#     state: enabled
+
+- name: Install required packages for Kafka
+  when: include_kafka == "yes"
+  dnf:
+    name:
+      - gcc
+      - autoconf
+      - automake
+      - java-17-amazon-corretto-devel   # Equivalent to default-jre on Ubuntu
+      - libbsd-devel
+      - libtool
+      - libevent-devel
+      - pkg-config
+      - zlib-devel
+      - openssl-devel
+      - nginx
+      - unzip
+    state: present

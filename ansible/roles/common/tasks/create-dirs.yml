@@ -1,8 +1,8 @@
 - name: make main file location across the nodes
   become: yes
   file: 
-    path: "{{ crdb_file_location }}/{{ admin_username }}"
+    path: "{{ crdb_file_location }}/{{ login_username }}"
     state: directory
     mode: '0777'
-    owner: "{{ admin_username }}"
-    group: "{{ admin_username }}"
+    owner: "{{ login_username }}"
+    group: "{{ login_username }}"

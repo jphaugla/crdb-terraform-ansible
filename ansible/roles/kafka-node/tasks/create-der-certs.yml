@@ -6,9 +6,9 @@
 
 - name: change ca.crt.der owner
   file: 
-    path: /home/{{login_username}}/certs/ca.crt.der
-    owner: {{login_username}}
-    group: {{login_username}}
+    path: "/home/{{login_username}}/certs/ca.crt.der"
+    owner: "{{login_username}}"
+    group: "{{login_username}}"
 
 - name: create client.db_admin_user.crt.der
   shell: 
@@ -18,17 +18,17 @@
 - name: change client.db_admin_user.crt.der
   file: 
     path: "/home/{{login_username}}/certs/client.{{ db_admin_user }}.crt.der"
-    owner: {{login_username}}
-    group: {{login_username}}
+    owner: "{{login_username}}"
+    group: "{{login_username}}"
 
 - name: create client.db_admin_user.key.der
   shell: 
     cmd: "openssl pkcs8 -topk8 -inform PEM -outform DER -in client.{{ db_admin_user }}.key -out client.{{ db_admin_user }}.key.der -nocrypt"
-    chdir: /home/{{login_username}}/certs
+    chdir: "/home/{{login_username}}/certs"
 
 - name: change client.db_admin_user.key.der
   file: 
     path: "/home/{{login_username}}/certs/client.{{ db_admin_user }}.key.der"
-    owner: {{login_username}}
-    group: {{login_username}}
+    owner: "{{login_username}}"
+    group: "{{login_username}}"
 
