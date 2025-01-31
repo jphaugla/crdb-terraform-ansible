@@ -19,7 +19,6 @@ resource "local_file" "instances_file" {
             cluster_size = "${var.crdb_nodes}"
             all_public_ips = "${join("\n", compact([
               aws_instance.haproxy.0.public_ip,
-              aws_instance.kafka.0.public_ip,
               join("\n", aws_instance.crdb.*.public_ip),
               join("\n", aws_instance.app.*.public_ip)
             ]))}"

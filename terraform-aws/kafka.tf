@@ -14,6 +14,6 @@ resource "aws_instance" "kafka" {
     delete_on_termination = true
     encrypted             = true
     volume_type           = "gp2"
-    volume_size           = 8
+    volume_size           = 50
   }
 }

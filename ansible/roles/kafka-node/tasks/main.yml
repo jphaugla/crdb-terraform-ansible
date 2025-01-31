@@ -9,6 +9,21 @@
   when:
     - save_ips|bool
 
+- name: add file location to hold files
+  include_tasks: create-dirs.yml
+  when:
+    - create_dirs|bool
+
+- name: install cockroach sql
+  include_tasks: install-cockroach-sql.yml
+  when:
+    - install_cockroach_sql|bool
+
+- name: add-certs
+  include_tasks: add-certs.yml
+  when:
+    - add_certs|bool
+
 #  leaving this code here but have converted the ami for kafka node to be ubuntu because the amazon linux 2023 didn't work with confluent/kafka
 
 - name: Debug OS information

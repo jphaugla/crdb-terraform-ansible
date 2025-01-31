@@ -2,33 +2,33 @@
 - name: create ca.crt.der
   shell: 
     cmd: "openssl x509 -outform der -in ca.crt -out ca.crt.der"
-    chdir: /home/{{login_username}}/certs
+    chdir: /home/ubuntu/certs
 
 - name: change ca.crt.der owner
   file: 
-    path: "/home/{{login_username}}/certs/ca.crt.der"
-    owner: "{{login_username}}"
-    group: "{{login_username}}"
+    path: "/home/ubuntu/certs/ca.crt.der"
+    owner: ubuntu
+    group: ubuntu
 
 - name: create client.db_admin_user.crt.der
   shell: 
     cmd: "openssl x509 -outform der -in client.{{ db_admin_user }}.crt -out client.{{ db_admin_user }}.crt.der"
-    chdir: /home/{{login_username}}/certs
+    chdir: /home/ubuntu/certs
 
 - name: change client.db_admin_user.crt.der
   file: 
-    path: "/home/{{login_username}}/certs/client.{{ db_admin_user }}.crt.der"
-    owner: "{{login_username}}"
-    group: "{{login_username}}"
+    path: "/home/ubuntu/certs/client.{{ db_admin_user }}.crt.der"
+    owner: ubuntu
+    group: ubuntu
 
 - name: create client.db_admin_user.key.der
   shell: 
     cmd: "openssl pkcs8 -topk8 -inform PEM -outform DER -in client.{{ db_admin_user }}.key -out client.{{ db_admin_user }}.key.der -nocrypt"
-    chdir: "/home/{{login_username}}/certs"
+    chdir: "/home/ubuntu/certs"
 
 - name: change client.db_admin_user.key.der
   file: 
-    path: "/home/{{login_username}}/certs/client.{{ db_admin_user }}.key.der"
-    owner: "{{login_username}}"
-    group: "{{login_username}}"
+    path: "/home/ubuntu/certs/client.{{ db_admin_user }}.key.der"
+    owner: ubuntu
+    group: ubuntu
 
