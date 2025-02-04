@@ -1,8 +1,8 @@
 - name: make main file location across the nodes
   become: yes
   file: 
-    path: "{{ crdb_file_location }}/ubuntu"
+    path: "{{ crdb_file_location }}/{{ kafka_username }}"
     state: directory
     mode: '0777'
-    owner: ubuntu
-    group: ubuntu
+    owner: "{{ kafka_username }}"
+    group: "{{ kafka_username }}"

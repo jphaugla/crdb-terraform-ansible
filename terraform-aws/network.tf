@@ -123,6 +123,12 @@ module "security-group-01" {
       description = "Allow Confluent Control Center access"
     },
     {
+      from_port   = 8082
+      to_port     = 8082
+      protocol    = "tcp"
+      description = "Allow Kafka access"
+    },
+    {
       from_port   = 8083
       to_port     = 8083
       protocol    = "tcp"
