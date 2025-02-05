@@ -486,3 +486,11 @@ variable "test-version" {
 variable "full_path_license_directory" {
   description = "full path to the license directory, needs two files cluster_organization and enterprise_lincense in the directory"
 }
+# ----------------------------------------
+# The following was created to account for NetSkope Tunneling
+# ----------------------------------------
+variable netskope_ips {
+   description = "A list of IP CIDR ranges to allow as clients.  The IPs listed below are Netskope IP Ranges"
+   default     = ["8.36.116.0/24" ,"8.39.144.0/24", "31.186.239.0/24", "163.116.128.0/17", "162.10.0.0/17"]
+   type        = list(string)
+}

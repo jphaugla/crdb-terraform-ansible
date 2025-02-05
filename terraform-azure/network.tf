@@ -22,14 +22,14 @@ resource "azurerm_subnet" "sn" {
   # tags are not a valid argument for subnets
 }
 
-resource "azurerm_network_security_group" "sg" {
+resource "azurerm_network_security_group" "desktop_sg" {
     name                = "${var.owner}-${var.resource_name}-sg"
     location            = var.virtual_network_location
     resource_group_name = local.resource_group_name
     tags                = local.tags
 }
 
-resource "azurerm_network_security_rule" "desk-ssh" {
+resource "azurerm_network_security_rule" "desktop_rule" {
         name                       = "Desktop-TO-CRDB"
         priority                   = 1001
         direction                  = "Inbound"
@@ -40,7 +40,21 @@ resource "azurerm_network_security_rule" "desk-ssh" {
         destination_port_ranges    = [22,26257,3000,8080,8081,8082,8083,8088,9021,9090,9092,9093,2181]
         destination_address_prefix = "*"
         resource_group_name        = local.resource_group_name
-	network_security_group_name = azurerm_network_security_group.sg.name
+	network_security_group_name = azurerm_network_security_group.desktop_sg.name
+}
+
+resource "azurerm_network_security_rule" "netskope_ip_ranges" {
+    name                       = "Netskope-IP-Ranges"
+    priority                   = 1002
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "*"
+    source_address_prefixes    = var.netskope_ips
+    source_port_range          = "*"
+    destination_port_ranges    = [22,26257,8080, 9021, 8083, 9092, 9093,]
+    destination_address_prefix = "*"
+    resource_group_name         = local.resource_group_name
+    network_security_group_name = azurerm_network_security_group.desktop_sg.name
 }
 
 #  30004 and 26257 should not be open to all this is not really cool
@@ -55,11 +69,11 @@ resource "azurerm_network_security_rule" "replicator-webhook" {
         destination_port_ranges    = [30004]
         destination_address_prefix = "*"
         resource_group_name        = local.resource_group_name
-	network_security_group_name = azurerm_network_security_group.sg.name
+	network_security_group_name = azurerm_network_security_group.desktop_sg.name
 }
 
 resource "azurerm_subnet_network_security_group_association" "desktop-access" {
   count                     = 3
   subnet_id                 = azurerm_subnet.sn[count.index].id
-  network_security_group_id = azurerm_network_security_group.sg.id
+  network_security_group_id = azurerm_network_security_group.desktop_sg.id
 }

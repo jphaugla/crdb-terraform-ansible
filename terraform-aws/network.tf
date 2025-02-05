@@ -85,9 +85,9 @@ module "security-group-01" {
   tags        = local.tags
   vpc_id      = aws_vpc.main.id
 
-  # Combine whitelist IPs with my own IP
-  # ingress_cidr_blocks = tolist(concat(var.whitelist_ips, [var.my_ip_address]))
-  ingress_cidr_blocks = concat(var.whitelist_ips,["${var.my_ip_address}/32"])
+  # Combine netskope IPs with my own IP
+  # ingress_cidr_blocks = tolist(concat(var.netskope_ips, [var.my_ip_address]))
+  ingress_cidr_blocks = concat(var.netskope_ips,["${var.my_ip_address}/32"])
 
   ingress_with_cidr_blocks = [
     {
