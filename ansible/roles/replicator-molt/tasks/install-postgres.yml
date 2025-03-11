@@ -1,21 +1,52 @@
----
-- name: enable postgresql stream 15
+- name: Debug OS information
+  become: yes
+  debug:
+    msg: >
+      The operating system is {{ ansible_facts['distribution'] }}
+      and the version is {{ ansible_facts['distribution_version'] }}
+
+- name: Set variable if Amazon Linux
+  set_fact:
+    is_amazon_linux: "{{ ansible_facts['distribution'] == 'Amazon' }}"
+
+- name: enable postgresql stream 15 for non amazon
   become: yes
   shell: 
     cmd: dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+  when:
+    - not is_amazon_linux|bool
 
-- name: install postgresql 
+- name: install postgresql  for non amazon
   become: yes
   shell: 
     cmd: dnf -y install postgresql15-server
+  when:
+    - not is_amazon_linux|bool
 
-- name: postgresql setup
+- name: install postgresql  for amazon
+  become: yes
+  shell: 
+    cmd: dnf -y install postgresql15-server
+  when:
+    - is_amazon_linux|bool
+
+- name: postgresql setup non-amazon
   become: yes
   shell:
     cmd: /usr/pgsql-15/bin/postgresql-15-setup initdb 
     creates: /var/lib/pgsql/15/data/postgresql.conf
+  when:
+    - not is_amazon_linux|bool
 
-- name: copy pg_hba.conf
+- name: postgresql setup amazon
+  become: yes
+  shell:
+    cmd: /bin/postgresql-setup initdb 
+    creates: /var/lib/pgsql/data/postgresql.conf
+  when:
+    - is_amazon_linux|bool
+
+- name: copy pg_hba.conf not amazon
   become: yes
   copy:
     src: pg_hba.conf
@@ -23,13 +54,44 @@
     owner: postgres
     group: postgres
     mode: '0600'
+  when:
+    - not is_amazon_linux|bool
 
-- name: start postgres
+- name: copy pg_hba.conf amazon
+  become: yes
+  copy:
+    src: pg_hba.conf
+    dest: /var/lib/pgsql/data/pg_hba.conf
+    owner: postgres
+    group: postgres
+    mode: '0600'
+  when:
+    - is_amazon_linux|bool
+
+- name: start postgres non amazon
   become: yes
   shell: 
     cmd: systemctl start postgresql-15
+  when:
+    - not is_amazon_linux|bool
 
-- name: set to start postgres on startup
+- name: set to start postgres on startup non amazon
   become: yes
   shell: 
     cmd: systemctl enable postgresql-15
+  when:
+    - not is_amazon_linux|bool
+
+- name: start postgres amazon
+  become: yes
+  shell: 
+    cmd: systemctl start postgresql
+  when:
+    - is_amazon_linux|bool
+
+- name: set to start postgres on startup 
+  become: yes
+  shell: 
+    cmd: systemctl enable postgresql
+  when:
+    - is_amazon_linux|bool

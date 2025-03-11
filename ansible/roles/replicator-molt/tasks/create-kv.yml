@@ -11,6 +11,6 @@
   ansible.builtin.template:
     src: kv-workload.j2
     dest: kv-workload.sh
-    owner: {{login_username}}
-    group: {{login_username}}
+    owner: "{{ login_username }}"
+    group: "{{ login_username }}"
     mode: '0755'

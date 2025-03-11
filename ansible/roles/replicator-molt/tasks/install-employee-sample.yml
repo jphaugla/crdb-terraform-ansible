@@ -6,7 +6,7 @@
 
 - name: copy create if not exist database command for postgres
   template:
-    src: createDB.sql
+    src: createDB.j2
     dest: /tmp/createDB.sql
     mode: '0755'
   ignore_errors: true
