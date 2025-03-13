@@ -323,9 +323,9 @@ To run molt-replicator (NOTE: currently this only works when deploying on AWS)
 * [Migrate from PostgreSQL](https://www.cockroachlabs.com/docs/stable/migrate-from-postgres)
 ## Two Datacenter Solutions
 ### Two Datacenter Links
-[Logical Data Replication blog](https://www.cockroachlabs.com/blog/logical-data-replication/)
-[Physical Cluster Replication Documentation](https://www.cockroachlabs.com/docs/stable/physical-cluster-replication-overview)
-[Logical Data Replication Documentation](https://www.cockroachlabs.com/docs/stable/logical-data-replication-overview)
+* [Logical Data Replication blog](https://www.cockroachlabs.com/blog/logical-data-replication/)
+* [Physical Cluster Replication Documentation](https://www.cockroachlabs.com/docs/stable/physical-cluster-replication-overview)
+* [Logical Data Replication Documentation](https://www.cockroachlabs.com/docs/stable/logical-data-replication-overview)
 ## dbworkload
 dbworkload is installed as part of the ansible set up.  A script to run is also configured with the correct IP addresses for running dbworkload with a standard banking demo as described in this [dbworkload project home](https://pypi.org/project/dbworkload/)
 ### using dbworkload

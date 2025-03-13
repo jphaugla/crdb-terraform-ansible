@@ -96,9 +96,26 @@
   when:
     - is_amazon_linux|bool
 
-- name: Set PostgreSQL user password
+- name: Install psycopg2-binary using pip on Amazon Linux 2023
+  become: yes
+  pip:
+    name: psycopg2-binary
+    executable: pip3
+  when:
+    - is_amazon_linux|bool
+
+- name: Install psycopg2 for Python 3 on Debian/Ubuntu
+  become: yes
+  apt:
+    name: python3-psycopg2
+    state: present
+  when:
+    - not is_amazon_linux|bool
+
+- name: Set PostgreSQL user password (idempotent)
+  become: yes
   become_user: postgres
-  shell: >
-    psql -c "ALTER USER postgres WITH PASSWORD '{{ db_admin_password }}';"
-  environment:
-    PGPASSWORD: ""
+  community.postgresql.postgresql_user:
+    name: postgres
+    password: "{{ db_admin_password }}"
+    login_unix_socket: /var/run/postgresql
