@@ -1,10 +1,10 @@
 # add replicator configuration to app node
+# I don't this this is needed any longer with newer replicator
 - name: create _replicator database
   command: "{{ lookup('template','create-replicator-db.j2') }}"
 
 - name: create dead letter queue
   command: "{{ lookup('template','dead-letter.j2') }}"
-
 - name: start replicator
   shell: 
     cmd: "( nohup ./start.sh > {{ crdb_file_location }}/{{ login_username }}/logs/replicator/replicator.log 2>&1 & )"
@@ -18,4 +18,3 @@
   shell: 
     cmd: "( nohup ./start.sh > {{ crdb_file_location }}/{{ login_username }}/logs/replicator/replicator2.log 2>&1 & )"
     chdir: /opt
-

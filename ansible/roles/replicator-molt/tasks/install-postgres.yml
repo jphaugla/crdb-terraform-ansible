@@ -95,3 +95,10 @@
     cmd: systemctl enable postgresql
   when:
     - is_amazon_linux|bool
+
+- name: Set PostgreSQL user password
+  become_user: postgres
+  shell: >
+    psql -c "ALTER USER postgres WITH PASSWORD '{{ db_admin_password }}';"
+  environment:
+    PGPASSWORD: ""

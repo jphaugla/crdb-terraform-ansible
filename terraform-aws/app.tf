@@ -4,6 +4,7 @@ resource "aws_instance" "app" {
   ami                         = "${data.aws_ami.amazon_linux_2023_x64.id}"
   instance_type               = var.app_instance_type
   key_name                    = var.crdb_instance_key_name
+  iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
   network_interface {
     network_interface_id = aws_network_interface.app[count.index].id
     device_index = 0

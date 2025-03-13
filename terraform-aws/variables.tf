@@ -324,13 +324,13 @@
       default     = "t3a.micro"
     }
 
-    variable "start_replicator" {
-      description = "'yes' or 'no' to start replicator application"
+    variable "setup_migration" {
+      description = "'yes' or 'no' to setup migration"
       type        = string
       default     = "yes"
       validation {
-        condition = contains(["yes", "no"], var.start_replicator)
-        error_message = "Valid value for variable 'start_replicator' is : 'yes' or 'no'"
+        condition = contains(["yes", "no"], var.setup_migration)
+        error_message = "Valid value for variable 'setup_migration' is : 'yes' or 'no'"
       }
     }
 

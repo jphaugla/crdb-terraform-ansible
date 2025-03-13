@@ -1,5 +1,5 @@
 - meta: end_play
-  when: start_replicator != "yes"
+  when: setup_migration != "yes"
 
 - name: install postgres
   include_tasks: install-postgres.yml
@@ -25,3 +25,8 @@
   include_tasks: create-kv.yml
   when:
     - create_kv|bool
+
+- name: molt scripts
+  include_tasks: molt-scripts.yml
+  when:
+    - molt_scripts|bool

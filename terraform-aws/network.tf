@@ -117,6 +117,12 @@ module "security-group-01" {
       description = "Allow RDP over UDP"
     },
     {
+      from_port   = 5432
+      to_port     = 5432
+      protocol    = "tcp"
+      description = "Allow postgres access"
+    },
+    {
       from_port   = 9021
       to_port     = 9021
       protocol    = "tcp"
@@ -160,7 +166,7 @@ resource "aws_security_group_rule" "http_from_vpc" {
   type                     = "ingress"
   from_port                = 8080
   to_port                  = 8080
-  protocol                 = "http"
+  protocol                 = "tcp"
   cidr_blocks              = [var.vpc_cidr]
   description              = "Allow HTTP traffic from Load Balancer"
   security_group_id        = module.security-group-02.security_group_id 

@@ -27,8 +27,9 @@
     - [CockroachDB Links](#cockroachdb-links)
     - [Other Links](#general-links)
     - [Terraform/Ansible Description](#terraformansible-documentation)
-    - [replicator](#replicator-replicator)
-      - [replicator links](#replicator-links)
+    - [molt-replicator](#molt-replicator)
+      - [Running molt-replicator](#running-molt-replicator) 
+      - [molt-replicator links](#molt-replicator-links)
 ## Directory structure
 Currently, this deployment github only supports AZURE but that will change to next include AWS and finally GCP.  The goal is 
 to have minimal changes to the ansible for each of the cloud providers and this will be automated.  The subdirectories are:
@@ -282,17 +283,49 @@ https://github.com/guillermo-musumeci/terraform-azure-vm-bootstrapping-2/blob/ma
     * A vars/main.yml file has variable flags to enable/disable processing
     * A tasks/main.yml calls the required tasks to do the actual processing
     * A templates directory has j2 files allowing environment variable and other substitution
-## replicator (replicator)
-![](resources/replicator-components.png)
-This is a schematic of the replicator deployment.  Within region, the nodes only use the private IPs to connect.  
-The only port needed to be opened between the regions is the port for replicator running on the application node (30004).  The changefeed from 
-the other region will have this application nodes public IP address in its webhook address.
-### replicator links
+## Molt-replicator
+* Molt replicator is no longer used for 2 region/DC deployments of CockroachDB but is part of zero downtime migration with molt
+* 2 region/DC deployments of CockroachDB use Logical Data Replication or Physical Cluster Replication [see below](#two-datacenter-solutions)
+* This github enables but does not fully automate migration and replication from PostgreSQL to CockroachDB
+  * On AWS, an S3 bucket is created to enable the migration
+  * Scripts are created on the application node with the correct connection strings for this github's deployments
+### Running molt-replicator
+To run molt-replicator (NOTE: currently this only works when deploying on AWS)
+* Turn on the processing for molt-replicator with the terraform variable *setup_migration* in [main.tf](https://github.com/jphaugla/crdb-terraform-ansible/blob/main/terraform-aws/region1/main.tf)
+* Use the scripts created on the application node in /home/ec2-user/
+  * Login to application node
+  * Dump the DDL for the already created employees database in postgres
+``` bash
+./pg_dump_employees.sh
+```
+  * Convert the resulting employees database DDL from PostgreSQL to CockroachDB
+``` bash
+./molt_convert.sh
+```
+  * Edit the resulting file to use a new database, *employees* instead of creating a new schema *employees*
+    * change the line *CREATE SCHEMA employees;* to *CREATE DATABASE employees; use employees;*
+    * remove every occurrence of *ALTER SCHEMA employees OWNER TO postgres;*
+  * Create the *employees* database in CockroachDB
+```bash
+./runit.sh
+```
+  * Push the data from postgreSQL through the S3 to CockroachDB
+```bash
+ ./molt_s3.sh 
+ ```
+### Molt replicator links
 * [cockroachDB create changefeed](https://www.cockroachlabs.com/docs/stable/create-changefeed)
-* [replicator github](https://github.com/cockroachdb/replicator)
-* [replicator docker hub](https://hub.docker.com/r/cockroachdb/replicator/tags)
-* [active-active Docker deployment](https://github.com/cockroachdb/replicator/tree/master/scripts/active_active)
+* [Migration Overview](https://www.cockroachlabs.com/docs/stable/migration-overview)
 * [replicator/replicator grafana dashboards](https://github.com/cockroachdb/replicator/wiki/Monitoring)
+* [MOLT schema conversion](https://www.cockroachlabs.com/docs/cockroachcloud/migrations-page)
+* [MOLT docker example](https://github.com/viragtripathi/cockroach-collections/tree/main/scripts/cockroach-molt-demo)
+* [MOLT Fetch](https://www.cockroachlabs.com/docs/molt/molt-fetch)
+* [Migrate from PostgreSQL](https://www.cockroachlabs.com/docs/stable/migrate-from-postgres)
+## Two Datacenter Solutions
+### Two Datacenter Links
+[Logical Data Replication blog](https://www.cockroachlabs.com/blog/logical-data-replication/)
+[Physical Cluster Replication Documentation](https://www.cockroachlabs.com/docs/stable/physical-cluster-replication-overview)
+[Logical Data Replication Documentation](https://www.cockroachlabs.com/docs/stable/logical-data-replication-overview)
 ## dbworkload
 dbworkload is installed as part of the ansible set up.  A script to run is also configured with the correct IP addresses for running dbworkload with a standard banking demo as described in this [dbworkload project home](https://pypi.org/project/dbworkload/)
 ### using dbworkload

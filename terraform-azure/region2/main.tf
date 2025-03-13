@@ -50,8 +50,9 @@ module "azure" {
 # ----------------------------------------
 #   this is very small node just for testing deployment
 #   crdb_vm_size               = "Standard_B4ms"
+   crdb_vm_size               = "Standard_D4s_v5"
 #   this is a medium size  production node
-   crdb_vm_size               = "Standard_D8s_v5"
+#   crdb_vm_size               = "Standard_D8s_v5"
 #   crdb_vm_size               = "Standard_D32s_v5"
    crdb_disk_size             = 1024
    crdb_store_disk_size             = 1024
@@ -67,7 +68,7 @@ module "azure" {
 # ----------------------------------------
 # CRDB Specifications
 # ----------------------------------------
-   crdb_version               = "24.3.4"
+   crdb_version               = "25.1.0"
 
 # ----------------------------------------
 # Cluster Enterprise License Keys
@@ -101,7 +102,7 @@ module "azure" {
 # APP Instance Specifications
 # ----------------------------------------
    include_app                = "yes"
-   start_replicator           = "no"
+   start_replicator           = "yes"
    app_nodes                  = 1
 #   this is bare minimum for functionalizy
 #   app_vm_size                = "Standard_B4ms"
@@ -111,7 +112,7 @@ module "azure" {
 # ----------------------------------------
 # Kafka Instance Specifications
 # ----------------------------------------
-   include_kafka           = "yes"
+   include_kafka           = "no"
 #   small size version
 #    kafka_vm_size            = "Standard_B4ms"
    kafka_vm_size             = "Standard_D4s_v5"

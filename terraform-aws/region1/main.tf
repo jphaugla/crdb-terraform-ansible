@@ -12,10 +12,12 @@ module "my_aws" {
 # CRDB Specifications
 # -----------------------------------------
    crdb_nodes = 3
-   crdb_instance_type = "t4g.medium"
+   #   this is a very small 2vcpu 4GB ram machine for functionality
+   # crdb_instance_type = "t4g.medium"
+   crdb_instance_type = "t4g.xlarge"
    crdb_store_volume_type = "gp3"
    crdb_store_volume_size = 8
-   crdb_version = "24.3.3"
+   crdb_version = "25.1.0"
    crdb_arm_release = "yes"
    crdb_enable_spot_instances = "no"
    crdb_file_location         = "/mnt/data"
@@ -31,13 +33,13 @@ module "my_aws" {
    include_ha_proxy = "yes"
    haproxy_instance_type = "t3a.large"
 # kafka
-   include_kafka = "yes"
+   include_kafka = "no"
    kafka_instance_type = "t3a.xlarge"
 # APP Node
    include_app = "yes"
    app_instance_type = "t3a.xlarge"
    create_dbadmin_user = "yes"
-   start_replicator           = "no"
+   setup_migration           = "yes"
    dbadmin_user_name          = "jhaugland"
    dbadmin_user_password      = "jasonrocks"
 # ----------------------------------------

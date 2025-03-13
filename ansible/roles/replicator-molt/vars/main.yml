@@ -14,6 +14,8 @@ nvm_version: "0.39.1"
 node_version: "19.7.0"
 add_password: true
 create_der_certs: true
-start_replicator: true
+#  don't think is needed any longer
+start_replicator: false
 start_java_app: true
 create_kv: true
+molt_scripts: true
