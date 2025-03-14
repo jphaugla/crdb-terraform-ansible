@@ -1,0 +1,15 @@
+export AWS_REGION="{{ region }}"
+export COCKROACH_CONNECT='postgresql://{{ db_admin_user }}@{{load_balancer_private_ip}}:26257/employees?sslmode=verify-full&sslrootcert=/home/{{ login_username }}/certs/ca.crt&sslcert=/home/{{ login_username }}/certs/client.{{ db_admin_user }}.crt&sslkey=/home/{{ login_username }}/certs/client.{{ db_admin_user }}.key'
+export POSTGRES_CONNECT='postgres://postgres:{{ db_admin_password }}@localhost:5432/employees?sslmode=disable'
+molt fetch \
+--source ${POSTGRES_CONNECT} \
+--target ${COCKROACH_CONNECT} \
+--bucket-path 's3://jhaug-east2-molt-bucket/incoming/' \
+--import-region 'us-east-2' \
+--allow-tls-mode-disable \
+--use-implicit-auth \
+--logging trace \
+--mode replication-only \
+--pglogical-replication-slot-name "replication_slot_jph" \
+--pglogical-publication-and-slot-drop-and-recreate \
+--table-handling none

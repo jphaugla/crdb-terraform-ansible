@@ -313,6 +313,19 @@ To run molt-replicator (NOTE: currently this only works when deploying on AWS)
 ```bash
  ./molt_s3.sh 
  ```
+  * Start replication of the data from postgreSQL through the S3 to CockroachDB
+```bash
+ ./molt_s3_replicate.sh 
+ ```
+  * Insert a row of data in psql and see that it flows to cockroachdb
+```bash
+psql -U postgres -h '127.0.0.1' -d employees
+insert into employee values (9000, '1989-12-13', 'Taylor', 'Swift', 'F', '2022-06-26');
+exit
+./sql.sh
+use employees;
+select * from employees where id=9000;
+```
 ### Molt replicator links
 * [cockroachDB create changefeed](https://www.cockroachlabs.com/docs/stable/create-changefeed)
 * [Migration Overview](https://www.cockroachlabs.com/docs/stable/migration-overview)

@@ -6,6 +6,14 @@
     group: "{{ login_username }}"
     mode: '0755'
 
+- name: copy molt_s3_replicator script
+  ansible.builtin.template:
+    src: molt_s3_replicator.j2
+    dest: molt_s3_replicator.sh
+    owner: "{{ login_username }}"
+    group: "{{ login_username }}"
+    mode: '0755'
+
 - name: copy molt_direct script
   ansible.builtin.template:
     src: molt_direct.j2
