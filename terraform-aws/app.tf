@@ -16,4 +16,8 @@ resource "aws_instance" "app" {
     volume_size           = 8
   }
   #  To connect using the keys that have been created:
+  metadata_options {
+    http_endpoint = "enabled"
+    http_tokens   = "optional"  # Change to "required" only if your application supports IMDSv2 token retrieval
+  }
 }

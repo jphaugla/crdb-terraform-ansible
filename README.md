@@ -302,12 +302,12 @@ To run molt-replicator (NOTE: currently this only works when deploying on AWS)
 ``` bash
 ./molt_convert.sh
 ```
-  * Edit the resulting file to use a new database, *employees* instead of creating a new schema *employees*
+  * Edit the resulting file *employees_converted.sql* to use a new database, *employees* instead of creating a new schema *employees*
     * change the line *CREATE SCHEMA employees;* to *CREATE DATABASE employees; use employees;*
     * remove every occurrence of *ALTER SCHEMA employees OWNER TO postgres;*
   * Create the *employees* database in CockroachDB
 ```bash
-./runit.sh
+./create_employee_schema.sh
 ```
   * Push the data from postgreSQL through the S3 to CockroachDB
 ```bash

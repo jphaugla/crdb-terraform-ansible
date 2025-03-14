@@ -10,6 +10,7 @@ resource "aws_instance" "crdb" {
     device_index = 0
   }
   key_name      = var.crdb_instance_key_name
+  iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
   root_block_device {
     delete_on_termination = true
     encrypted = true
@@ -22,5 +23,9 @@ resource "aws_instance" "crdb" {
     encrypted = true
     volume_type = var.crdb_store_volume_type
     volume_size = var.crdb_store_volume_size
+  }
+  metadata_options {
+    http_endpoint = "enabled"
+    http_tokens   = "optional"  # Change to "required" only if your application supports IMDSv2 token retrieval
   }
 }
