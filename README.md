@@ -295,11 +295,11 @@ To run molt-replicator (NOTE: currently this only works when deploying on AWS)
 * Use the scripts created on the application node in /home/ec2-user/
 NOTE:  for each of these scripts, I have linked the ansible template (j2) or  file that is used to create this shell script.  Hope this helps with understanding for the reader.
   * Login to application node
-  * Dump the DDL for the already created employees database in postgres using ![pg_dump_employees.sh](ansible/roles/replicator-molt/files/pg_dump_employees.sh)
+  * Dump the DDL for the already created employees database in postgres using [pg_dump_employees.sh](ansible/roles/replicator-molt/files/pg_dump_employees.sh)
 ``` bash
 ./pg_dump_employees.sh
 ```
-  * Convert the resulting employees database DDL from PostgreSQL to CockroachDB using ![molt_convert.sh](ansible/roles/replicator-molt/templates/molt_convert.j2)
+  * Convert the resulting employees database DDL from PostgreSQL to CockroachDB using [molt_convert.sh](ansible/roles/replicator-molt/templates/molt_convert.j2)
 ``` bash
 ./molt_convert.sh
 ```
@@ -310,11 +310,11 @@ NOTE:  for each of these scripts, I have linked the ansible template (j2) or  fi
 ```bash
 ./create_employee_schema.sh
 ```
-  * Push the data from postgreSQL through the S3 to CockroachDB ![molt_s3.sh](ansible/roles/replicator-molt/templates/molt_s3.j2)
+  * Push the data from postgreSQL through the S3 to CockroachDB [molt_s3.sh](ansible/roles/replicator-molt/templates/molt_s3.j2)
 ```bash
  ./molt_s3.sh 
  ```
-  * Start replication of the data from postgreSQL through the S3 to CockroachDB using ![molt_s3_replicate.sh](ansible/roles/replicator-molt/templates/molt_s3_replicator.j2)
+  * Start replication of the data from postgreSQL through the S3 to CockroachDB using [molt_s3_replicate.sh](ansible/roles/replicator-molt/templates/molt_s3_replicator.j2)
 ```bash
  ./molt_s3_replicate.sh 
  ```
