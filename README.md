@@ -306,7 +306,7 @@ NOTE:  for each of these scripts, I have linked the ansible template (j2) or  fi
   * Edit the resulting file *employees_converted.sql* to use a new database, *employees* instead of creating a new schema *employees*
     * change the line *CREATE SCHEMA employees;* to *CREATE DATABASE employees; use employees;*
     * remove every occurrence of *ALTER SCHEMA employees OWNER TO postgres;*
-  * Create the *employees* database in CockroachDB using ![create_employee_schema.sh](ansible/roles/replicator-molt/templates/create_employee_schema.j2)
+  * Create the *employees* database in CockroachDB using [create_employee_schema.sh](ansible/roles/replicator-molt/templates/create_employee_schema.j2)
 ```bash
 ./create_employee_schema.sh
 ```
