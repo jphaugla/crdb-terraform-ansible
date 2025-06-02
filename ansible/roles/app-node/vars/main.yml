@@ -1,17 +1,21 @@
 save_ips: true
 #  WARN-this version changes really fast and aborts when specified not found
-maven_version: '3.9.6'
+maven_version: '3.9.9'
 #  this works fine but the maven version keeps changing so setting to true
 install_java_maven_go: true
-install_molt_replicator: true
+#  default set to false as it starts postgresql
+install_molt_replicator: false
 #  this isn't working
 install_dbworkload: false
 add_githubs: true
 # this isn't working
 install_sysbench: false
+# this is really slow so only if necessary
+setup_cost_calculator: false
 package_java_app: true
 install_nodejs_typescript: true
 nvm_version: "0.40.1"
 node_version: "20.18.0"
 create_der_certs: true
-start_java_app: true
+# change default to not start the java app
+start_java_app: false

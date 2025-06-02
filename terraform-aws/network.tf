@@ -139,6 +139,12 @@ module "security-group-01" {
       to_port     = 8083
       protocol    = "tcp"
       description = "Allow Kafka Connect access"
+    },
+    {
+      from_port   = 8000,
+      to_port     = 8000,
+      protocol    = "tcp",
+      description = "Allow HTTP server access on port 8000"
     }
   ]
 

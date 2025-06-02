@@ -1,0 +1,19 @@
+# Installing and Configuring packages
+- name: Install packages
+  become: yes
+  yum:
+    state: latest
+    name:
+      - gcc
+      - gcc-c++
+      - libpq-devel
+      - python3-devel
+      - postgresql-devel
+
+- name: Install sqlalchemy and psycopg2
+  become: yes
+  pip:
+    name:
+      - sqlalchemy~=1.4
+      - sqlalchemy-cockroachdb
+      - psycopg2

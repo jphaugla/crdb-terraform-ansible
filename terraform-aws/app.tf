@@ -12,8 +12,8 @@ resource "aws_instance" "app" {
   root_block_device {
     delete_on_termination = true
     encrypted             = true
-    volume_type           = "gp2"
-    volume_size           = 8
+    volume_type           = "gp3"
+    volume_size           = 100
   }
   #  To connect using the keys that have been created:
   metadata_options {

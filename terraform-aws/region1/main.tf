@@ -17,7 +17,7 @@ module "my_aws" {
    crdb_instance_type = "t4g.xlarge"
    crdb_store_volume_type = "gp3"
    crdb_store_volume_size = 8
-   crdb_version = "25.1.0"
+   crdb_version = "25.2.0"
    crdb_arm_release = "yes"
    crdb_enable_spot_instances = "no"
    crdb_file_location         = "/mnt/data"

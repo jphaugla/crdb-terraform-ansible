@@ -12,6 +12,9 @@
 - name: install python pip
   include_tasks: install-python-pip.yml
 
+- name: install gcc and other packages - must be after python and pip
+  include_tasks: install-packages.yml
+
 - name: install java maven and go
   include_tasks: install-java-maven-go.yml
   when:
@@ -42,10 +45,18 @@
   when:
     - package_java_app|bool
 
+- name: setup costCalculator
+  include_tasks: setup-cost-calculator.yml
+  when:
+    - setup_cost_calculator|bool
+
 - name: install nodejs and typescript
   include_tasks: install-nodejs-typescript.yml
   when:
     - install_nodejs_typescript|bool
+
+- name: install eCommerce
+  include_tasks: install-ecommerce.yml
 
 - name: install sysbench
   include_tasks: install-sysbench.yml

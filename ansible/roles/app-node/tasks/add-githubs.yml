@@ -4,3 +4,17 @@
   git:
     repo: 'https://github.com/jphaugla/Digital-Banking-CockroachDB'
     dest: /opt/Digital-Banking-CockroachDB
+
+# ignore errors because get an error if running this second time 
+- name: checkout costCalculator	
+  ignore_errors: yes
+  git:
+    repo: 'https://github.com/jphaugla/costCalculator.git'
+    dest: /opt/costCalculator
+
+# ignore errors because get an error if running this second time 
+- name: checkout nextEcommerce	
+  ignore_errors: yes
+  git:
+    repo: 'https://github.com/jphaugla/nextEcommerce.git'
+    dest: /opt/nextEcommerce

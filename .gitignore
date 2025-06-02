@@ -1,7 +1,8 @@
 **/keys.sh
 .DS_Store
 ansible/.DS_Store
-.terraform/
+**/.terraform/
+**/.terraform.lock.hcl/
 terraform.tfstate*
 .terraform*
 ansible/temp

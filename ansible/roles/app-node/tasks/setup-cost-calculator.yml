@@ -1,0 +1,24 @@
+- name: Create virtual environment
+  command: python3 -m venv /opt/costCalculator/pricing/venv
+  args:
+    creates: "/opt/costCalculator/pricing/venv"
+ 
+- name: Upgrade pip in virtual environment
+  command: "/opt/costCalculator/pricing/venv/bin/python -m pip install --upgrade pip"
+
+
+- name: Install Python dependencies in venv
+  pip:
+    requirements: "/opt/costCalculator/pricing/requirements.txt"
+    virtualenv: "/opt/costCalculator/pricing/venv"
+    virtualenv_python: python3
+
+- name: Run Python script to fetch all aws in venv
+  command: "/opt/costCalculator/pricing/venv/bin/python fetch_all_aws.py"
+  args:
+    chdir: "/opt/costCalculator/pricing/"
+
+- name: Run http server script
+  command: "/opt/costCalculator/pricing/start_http.sh"
+  args:
+    chdir: "/opt/costCalculator/pricing"
