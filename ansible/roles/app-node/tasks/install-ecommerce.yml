@@ -6,3 +6,8 @@
     executable: /bin/bash
   environment:
     HOME: "/home/{{ login_username }}"
+- name: save environment script
+  copy:
+    content: "{{ lookup('template','setEenv.j2') }}"
+    dest: /opt/nextEcommerce/.env
+    mode: '0755'

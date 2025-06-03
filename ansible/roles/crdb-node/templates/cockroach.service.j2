@@ -1,0 +1,30 @@
+[Unit]
+Description=CockroachDB Cluster
+After=network.target
+
+[Service]
+Type=notify
+{% if cockroach_user is defined and cockroach_group is defined %}
+User={{ login_username }}
+Group={{ login_username }}
+{% endif %}
+
+ExecStart=/usr/local/bin/cockroach start \
+  --locality=region={{ region }} \
+  --certs-dir=/home/{{ login_username }}/certs \
+  --advertise-addr={{  hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }} \
+  --join={{ join_string }} \
+  --listen-addr=0.0.0.0:26257 \
+  --http-addr=0.0.0.0:8080 \
+  --max-offset=250ms \
+  --store={{ crdb_file_location }}/{{ login_username }}/cockroach-data \
+  {% if allow_non_tls | default(false) %}\
+  --accept-sql-without-tls
+  {% endif %}
+
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+

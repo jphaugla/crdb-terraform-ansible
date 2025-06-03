@@ -3,7 +3,7 @@ resource "aws_lb" "public_lb" {
   count              = var.include_load_balancer == "yes" ? 1 : 0
   name               = "${var.owner}-${var.project_name}-public-lb"
   internal           = false
-  security_groups    = [aws_security_group.lb_security_group.id]
+  security_groups    = [aws_security_group.lb_sg.id]
   subnets            = aws_subnet.public_subnets[*].id
   enable_deletion_protection = false
   load_balancer_type = "application" # ALB

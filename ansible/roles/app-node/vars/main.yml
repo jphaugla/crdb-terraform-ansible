@@ -15,7 +15,7 @@ setup_cost_calculator: false
 package_java_app: true
 install_nodejs_typescript: true
 nvm_version: "0.40.1"
-node_version: "20.18.0"
+node_version: "23.11.0"
 create_der_certs: true
 # change default to not start the java app
 start_java_app: false

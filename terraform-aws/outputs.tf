@@ -87,10 +87,25 @@ output "route_table_private_id" {
 
 output "security_group_intra_node_id" {
   description = "ID of the security group allowing intra-node communication"
-  value = module.security-group-02.security_group_id
+  value = module.security_group_intra.security_group_id
 }
 
-output "security_group_external_access_id" {
-  description = "ID of the security group allowing communication external to the VPC"
-  value = module.security-group-01.security_group_id
+output "security_group_sg_management" {
+  description = "ID of the security group allowing management communication"
+  value = module.sg_management.security_group_id
+}
+
+output "security_group_sg_database" {
+  description = "ID of the security group allowing database communication"
+  value = module.sg_database.security_group_id
+}
+
+output "security_group_sg_kafka" {
+  description = "ID of the security group allowing kafka communication"
+  value = module.sg_kafka.security_group_id
+}
+
+output "security_group_sg_application" {
+  description = "ID of the security group allowing application communication"
+  value = module.sg_application.security_group_id
 }
