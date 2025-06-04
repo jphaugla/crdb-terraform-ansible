@@ -1,0 +1,20 @@
+[kafka_node_ips]
+null ansible_user=ubuntu
+[crdb_node_ips]
+3.12.150.61 ansible_user=ec2-user
+3.144.211.197 ansible_user=ec2-user
+3.19.211.251 ansible_user=ec2-user 
+[crdb_node_ips_0]
+3.12.150.61 ansible_user=ec2-user
+[haproxy_node_ips]
+3.148.206.204 ansible_user=ec2-user
+[app_node_ips]
+3.17.156.19 ansible_user=ec2-user 
+[all_public_node_ips]
+3.148.206.204 ansible_user=ec2-user
+3.12.150.61 ansible_user=ec2-user
+3.144.211.197 ansible_user=ec2-user
+3.19.211.251 ansible_user=ec2-user
+3.17.156.19 ansible_user=ec2-user
+[all:vars]
+ansible_connection=ssh

@@ -14,7 +14,13 @@ module "sg_database" {
       from_port   = 26257
       to_port     = 26257
       protocol    = "tcp"
-      description = "Allow CockroachDB from trusted IPs"
+      description = "Allow CockroachDB access from trusted IPs"
+    },
+    {
+      from_port   = 8080
+      to_port     = 8080
+      protocol    = "tcp"
+      description = "Allow CockroachDB console access from trusted IPs"
     },
     {
       from_port   = 5432

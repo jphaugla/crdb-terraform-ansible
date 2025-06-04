@@ -9,7 +9,17 @@ module "crdb-region-0" {
   project_name               = var.project_name
   crdb_instance_key_name     = var.aws_instance_keys[0]
   ssh_private_key            = var.ssh_private_key_list[0]
-  vpc_cidr                    = var.vpc_cidr_list[0]
+  vpc_cidr                   = var.vpc_cidr_list[0]
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # ANSIBLE / INVENTORY PATH OVERRIDES
+  # ──────────────────────────────────────────────────────────────────────────
+
+  instances_inventory_file           = "../../terraform-aws/inventory-${var.aws_region_list[0]}"
+  playbook_working_directory         = "../../ansible"
+  playbook_instances_inventory_file  = "../terraform-aws/inventory-${var.aws_region_list[0]}"
+  instances_inventory_directory      = "temp"
+  inventory_template_file            = "templates/inventory.tpl"
 
   # ─── CRDB specs ───
   crdb_nodes                 = var.crdb_nodes
@@ -58,7 +68,18 @@ module "crdb-region-1" {
   project_name               = var.project_name
   crdb_instance_key_name     = var.aws_instance_keys[1]
   ssh_private_key            = var.ssh_private_key_list[1]
-  vpc_cidr                    = var.vpc_cidr_list[1]
+  vpc_cidr                   = var.vpc_cidr_list[1]
+  join_string                = module.crdb-region-0.join_string
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # ANSIBLE / INVENTORY PATH OVERRIDES
+  # ──────────────────────────────────────────────────────────────────────────
+
+  instances_inventory_file           = "../../terraform-aws/inventory-${var.aws_region_list[1]}"
+  playbook_working_directory         = "../../ansible"
+  playbook_instances_inventory_file  = "../terraform-aws/inventory-${var.aws_region_list[1]}"
+  instances_inventory_directory      = "temp"
+  inventory_template_file            = "templates/inventory.tpl"
 
   crdb_nodes                 = var.crdb_nodes
   crdb_instance_type         = var.crdb_instance_type
@@ -100,7 +121,17 @@ module "crdb-region-2" {
   project_name               = var.project_name
   crdb_instance_key_name     = var.aws_instance_keys[2]
   ssh_private_key            = var.ssh_private_key_list[2]
-  vpc_cidr                    = var.vpc_cidr_list[2]
+  vpc_cidr                   = var.vpc_cidr_list[2]
+  join_string                = module.crdb-region-0.join_string
+  # ──────────────────────────────────────────────────────────────────────────
+  # ANSIBLE / INVENTORY PATH OVERRIDES
+  # ──────────────────────────────────────────────────────────────────────────
+
+  instances_inventory_file           = "../../terraform-aws/inventory-${var.aws_region_list[2]}"
+  playbook_working_directory         = "../../ansible"
+  playbook_instances_inventory_file  = "../terraform-aws/inventory-${var.aws_region_list[2]}"
+  instances_inventory_directory      = "temp"
+  inventory_template_file            = "templates/inventory.tpl"
 
   crdb_nodes                 = var.crdb_nodes
   crdb_instance_type         = var.crdb_instance_type

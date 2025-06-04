@@ -1,5 +1,6 @@
 **/keys.sh
 **/.DS_Store
+.DS_Store
 ansible/.DS_Store
 **/.terraform/
 **/.terraform.lock.hcl/
