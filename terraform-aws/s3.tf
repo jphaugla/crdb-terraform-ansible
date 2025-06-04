@@ -1,15 +1,25 @@
+################################################################################
+# terraform-aws/s3.tf
+#
+# Each region’s S3 bucket and IAM role/profile must include virtual_network_location
+# so names are unique per region.
+################################################################################
+
 locals {
-  bucket_name = "${var.owner}-${var.project_name}-molt-bucket"
+  # Now include the region (virtual_network_location) to avoid collisions
+  bucket_name = "${var.owner}-${var.project_name}-${var.virtual_network_location}-molt-bucket"
 }
+
 resource "aws_s3_bucket" "molt_bucket" {
-  bucket = local.bucket_name
+  bucket        = local.bucket_name
   force_destroy = true
+
   tags = {
     Name = local.bucket_name
   }
 }
 
-# Create an empty object to mimic an "incoming" directory
+# Create an empty “incoming/” prefix to simulate a directory
 resource "aws_s3_object" "incoming_directory" {
   bucket  = aws_s3_bucket.molt_bucket.id
   key     = "incoming/"   # trailing slash simulates a directory
@@ -23,10 +33,10 @@ resource "aws_s3_bucket_policy" "molt_bucket_policy" {
     Version = "2012-10-17",
     Statement = [
       {
-        Sid      = "AllowReadWriteFromMyIP",
-        Effect   = "Allow",
+        Sid       = "AllowReadWriteFromMyIP",
+        Effect    = "Allow",
         Principal = "*",
-        Action   = [
+        Action    = [
           "s3:ListBucket",
           "s3:GetObject",
           "s3:PutObject",
@@ -39,8 +49,8 @@ resource "aws_s3_bucket_policy" "molt_bucket_policy" {
         Condition = {
           IpAddress = {
             "aws:SourceIp": [
-              var.my_ip_address,   // Your local machine’s public IP in CIDR notation (e.g., "203.0.113.45/32")
-              var.vpc_cidr         // The CIDR block of your VPC (e.g., "10.0.0.0/16")
+              var.my_ip_address,
+              var.vpc_cidr
             ]
           }
         }
@@ -50,7 +60,7 @@ resource "aws_s3_bucket_policy" "molt_bucket_policy" {
 }
 
 resource "aws_iam_role" "ec2_s3_role" {
-  name = "${var.owner}-${var.project_name}-ec2-s3-role"
+  name = "${var.owner}-${var.project_name}-${var.virtual_network_location}-ec2-s3-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -65,7 +75,8 @@ resource "aws_iam_role" "ec2_s3_role" {
 }
 
 resource "aws_iam_policy" "s3_policy" {
-  name   = "${var.owner}-${var.project_name}-s3-policy"
+  name = "${var.owner}-${var.project_name}-${var.virtual_network_location}-s3-policy"
+
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
@@ -90,7 +101,7 @@ resource "aws_iam_role_policy_attachment" "ec2_s3_attachment" {
 }
 
 resource "aws_iam_instance_profile" "ec2_instance_profile" {
-  name = "${var.owner}-${var.project_name}-instance-profile"
+  name = "${var.owner}-${var.project_name}-${var.virtual_network_location}-instance-profile"
   role = aws_iam_role.ec2_s3_role.name
 }
 

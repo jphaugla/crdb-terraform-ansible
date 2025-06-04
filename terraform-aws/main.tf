@@ -43,7 +43,7 @@ data "aws_ami" "ubuntu_22_04_gen2" {
 
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-2024*"]
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-2025*"]
   }
 
   filter {
