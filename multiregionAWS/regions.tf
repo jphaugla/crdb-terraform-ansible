@@ -10,6 +10,7 @@ module "crdb-region-0" {
   crdb_instance_key_name     = var.aws_instance_keys[0]
   ssh_private_key            = var.ssh_private_key_list[0]
   vpc_cidr                   = var.vpc_cidr_list[0]
+  aws_region_list            = var.aws_region_list
 
   # ──────────────────────────────────────────────────────────────────────────
   # ANSIBLE / INVENTORY PATH OVERRIDES
@@ -69,6 +70,7 @@ module "crdb-region-1" {
   crdb_instance_key_name     = var.aws_instance_keys[1]
   ssh_private_key            = var.ssh_private_key_list[1]
   vpc_cidr                   = var.vpc_cidr_list[1]
+  aws_region_list            = var.aws_region_list
   join_string                = module.crdb-region-0.join_string
 
   # ──────────────────────────────────────────────────────────────────────────
@@ -122,6 +124,7 @@ module "crdb-region-2" {
   crdb_instance_key_name     = var.aws_instance_keys[2]
   ssh_private_key            = var.ssh_private_key_list[2]
   vpc_cidr                   = var.vpc_cidr_list[2]
+  aws_region_list            = var.aws_region_list
   join_string                = module.crdb-region-0.join_string
   # ──────────────────────────────────────────────────────────────────────────
   # ANSIBLE / INVENTORY PATH OVERRIDES

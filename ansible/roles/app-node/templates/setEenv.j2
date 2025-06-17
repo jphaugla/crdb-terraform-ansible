@@ -1,3 +1,3 @@
-COCKROACH_DB_URL="postgresql://{{ db_admin_user }}:{{ db_admin_password }}@{{load_balancer_private_ip}}:26257/ecommerce?sslmode=disable"
+COCKROACH_DB_URL="postgresql://{{ db_admin_user }}:{{ db_admin_password }}@{{load_balancer_private_ip}}:26257/ecommerce?sslmode=verify-full&sslrootcert=$HOME/certs/ca.crt"
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET-=

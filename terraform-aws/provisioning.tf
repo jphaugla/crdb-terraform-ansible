@@ -29,6 +29,8 @@ resource "null_resource" "validation_check" {
 
 # Null Resource for Provisioning
 resource "null_resource" "provision" {
+ # only run the Ansible playbook if run_ansible = true
+ count = var.run_ansible ? 1 : 0
   triggers = {
     always_run = timestamp()
   }

@@ -56,14 +56,13 @@
     variable "virtual_network_location" {
       description = "AWS region"
       type        = string
-      default     = "us-east-2"
     }
 
     # This is not used except for the mult-region-demo function being added to the bashrc
     variable "aws_region_list" {
       description = "list of the AWS regions for the crdb cluster"
+      default = ["not", "used", "in-single"]
       type = list
-      default = ["us-east-2", "us-west-2", "us-east-1"]
     }
 
 # ----------------------------------------
@@ -231,7 +230,7 @@
     variable "crdb_version" {
       description = "CockroachDB Version"
       type        = string
-      default     = "24.2.4"
+      default     = "25.2.0"
     }
 
     variable "run_init" {
@@ -426,4 +425,16 @@
     variable "ansible_verbosity_switch" {
         description = "Set the about of verbosity to pass through to the ansible playbook command. No additional verbosity by default. Example: -v or -vv or -vvv."
         default = ""
+    }
+
+    variable "run_ansible" {
+      type        = bool
+      description = "Whether to run the Ansible playbooks in each region"
+      default     = true
+    }
+
+    variable "environment" {
+      description = "Deployment environment (e.g. dev, staging, prod)"
+      type        = string
+      default     = "dev"
     }

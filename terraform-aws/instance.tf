@@ -1,7 +1,11 @@
 # CRDB Nodes
 resource "aws_instance" "crdb" {
   count         = var.create_ec2_instances == "yes" ? var.crdb_nodes : 0
-  tags = merge(local.tags, {Name = "${var.owner}-crdb-instance-${count.index}"})
+  tags = merge(local.tags, 
+               {Name = "${var.owner}-crdb-instance-${count.index}",
+               CRDB  = "true",
+               Environment = var.environment,
+               })
   ami           = local.ami_id
   instance_type = var.crdb_instance_type
   network_interface {

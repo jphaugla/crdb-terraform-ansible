@@ -73,11 +73,24 @@ locals {
   subnet_list = cidrsubnets(var.vpc_cidr,3,3,3,3,3,3)
   private_subnet_list = chunklist(local.subnet_list,3)[0]
   public_subnet_list  = chunklist(local.subnet_list,3)[1]
-  availability_zone_count = 3
-  availability_zone_list = slice(data.aws_availability_zones.available.names,0,local.availability_zone_count)
-  
-}
+ # maximum AZs we want to consume
+  desired_az_count = 3
 
+  # how many AZ names are actually returned here?
+  actual_az_count = length(data.aws_availability_zones.available.names)
+
+  # slice_end = min(actual_az_count, desired_az_count)
+  slice_end = (
+    local.actual_az_count < local.desired_az_count
+  ) ? local.actual_az_count : local.desired_az_count
+
+  availability_zone_list = slice(
+    data.aws_availability_zones.available.names,
+    0,
+    local.slice_end
+  )
+}
+  
 locals {
 #  depends_on = [aws_network_interface.crdb]
   ip_list     = join(" ", aws_network_interface.crdb[*].private_ip)
@@ -104,4 +117,3 @@ variable netskope_ips {
   default     = ["8.36.116.0/24" ,"8.39.144.0/24", "31.186.239.0/24", "163.116.128.0/17", "162.10.0.0/17"]
   type        = list(string)
 }
-
