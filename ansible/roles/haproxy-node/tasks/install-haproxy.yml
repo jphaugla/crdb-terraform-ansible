@@ -1,6 +1,6 @@
 - name: Install the latest version haproxy
   become: yes
-  yum:
+  package:
     name: haproxy
     state: latest
 

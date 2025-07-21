@@ -152,10 +152,11 @@ variable "crdb_store_volume_size" {
 variable "crdb_version" {
   description = "CockroachDB version to install."
   type        = string
-  default     = "25.2.0"
+  default     = "25.2.2"
 
   validation {
     condition = contains([
+      "25.2.1","25.2.2",
       "25.2.0","25.1.6","25.1.5","25.1.4","25.1.3","25.1.2","25.1.1",
       "24.2.8","24.2.6","24.2.5","24.2.4","24.2.3","24.2.2","24.2.1",
       "23.2.19","23.2.18","23.2.17","23.2.1","23.1.14","23.1.13"

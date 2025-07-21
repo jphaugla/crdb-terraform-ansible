@@ -1,6 +1,15 @@
-# ignore errors because get an error if running this second time after updating scripts/setEnv.sh
-- name: Install git
+- name: Install git on Debian/Ubuntu
+  become: yes
+  apt:
+    name: git
+    state: latest
+    update_cache: yes
+  when: ansible_facts.pkg_mgr == 'apt'
+
+- name: Install git on RHEL/CentOS/Amazon
   become: yes
   yum:
     name: git
     state: latest
+  when: ansible_facts.pkg_mgr in ['yum','dnf']
+

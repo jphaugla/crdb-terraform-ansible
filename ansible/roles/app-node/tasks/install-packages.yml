@@ -1,14 +1,27 @@
-# Installing and Configuring packages
-- name: Install packages
+- name: Install system packages on Debian/Ubuntu
+  become: yes
+  apt:
+    name:
+      - gcc
+      - g++
+      - libpq-dev
+      - python3-dev
+      - postgresql-server-dev-all
+    state: latest
+    update_cache: yes
+  when: ansible_facts.pkg_mgr == 'apt'
+
+- name: Install system packages on RHEL/CentOS
   become: yes
   yum:
-    state: latest
     name:
       - gcc
       - gcc-c++
-      - libpq-devel
-      - python3-devel
       - postgresql-devel
+      - python3-devel
+      - libpq-devel
+    state: latest
+  when: ansible_facts.pkg_mgr in ['yum','dnf']
 
 - name: Install sqlalchemy and psycopg2
   become: yes
@@ -17,3 +30,4 @@
       - sqlalchemy~=1.4
       - sqlalchemy-cockroachdb
       - psycopg2
+    executable: pip3

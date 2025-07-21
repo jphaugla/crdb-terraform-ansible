@@ -1,120 +1,123 @@
 - name: Debug OS information
+  ansible.builtin.debug:
+    msg: "The operating system is {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
+
+# --------------------------
+#  Install Java 17
+# --------------------------
+- name: Install Java 17 on Debian/Ubuntu
   become: yes
-  debug:
-    msg: >
-      The operating system is {{ ansible_facts['distribution'] }}
-      and the version is {{ ansible_facts['distribution_version'] }}
+  apt:
+    name:
+      - openjdk-17-jdk
+    state: latest
+    update_cache: yes
+  when: ansible_facts.pkg_mgr == 'apt'
 
-- name: Set variable if Amazon Linux
-  set_fact:
-    is_amazon_linux: "{{ ansible_facts['distribution'] == 'Amazon' }}"
-
-- name: Install the latest version of Java 17 openjdk
+- name: Install Java 17 on RHEL/CentOS
   become: yes
   yum:
-    name: java-17-openjdk
+    name:
+      - java-17-openjdk
+      - java-17-openjdk-devel
     state: latest
-  when: 
-    - not is_amazon_linux|bool
+  when: ansible_facts.pkg_mgr in ['yum','dnf'] and not (ansible_facts['distribution'] == 'Amazon')
 
-- name: Install the latest version of Java 17 jre
+- name: Install Amazon Corretto 17 (Amazon Linux)
   become: yes
   yum:
-    name: java-17-openjdk-devel
+    name:
+      - java-17-amazon-corretto
+      - java-17-amazon-corretto-devel
     state: latest
-  when: 
-    - not is_amazon_linux|bool
+  when: ansible_facts['distribution'] == 'Amazon'
 
-- name: Install the latest version of Java 17 corretto
+# --------------------------
+#  Install Go
+# --------------------------
+- name: Install Go on Debian/Ubuntu
   become: yes
-  yum:
-    name: java-17-amazon-corretto
+  apt:
+    name: golang-go
     state: latest
-  when: 
-    - is_amazon_linux|bool
+    update_cache: yes
+  when: ansible_facts.pkg_mgr == 'apt'
 
-- name: Install the latest version of Java 17 corretto
-  become: yes
-  yum:
-    name: java-17-amazon-corretto-devel
-    state: latest
-  when: 
-    - is_amazon_linux|bool
-
-- name: Install Go amazon linux 2023
+- name: Install Go on Amazon Linux / RHEL
   become: yes
   package:
     name: golang
-  when: 
-    - is_amazon_linux|bool
+    state: latest
+  when: ansible_facts.pkg_mgr in ['yum','dnf']
 
-- name: Install Go non amazon
+# --------------------------
+#  Install Maven
+# --------------------------
+- name: Install Maven via package on Debian/Ubuntu
   become: yes
-  package:
-    name: go-toolset
-  when: 
-    - not is_amazon_linux|bool
+  apt:
+    name: maven
+    state: latest
+    update_cache: yes
+  when: ansible_facts.pkg_mgr == 'apt'
 
-- name: create binaries dir
-  file:
-    path: "/home/{{login_username}}/binaries"
-    owner: "{{login_username}}"
-    group: "{{login_username}}"
-    mode: '0755'
-    state: directory
-
-- name: configure java amazon
+- name: Install wget & tar prerequisites on RHEL/Amazon
   become: yes
-  shell:
-   cmd: |
-     cat <<EOF | sudo tee /etc/profile.d/jdk17.sh
-     export JAVA_HOME=/usr/lib/jvm/java-17-amazon-corretto
-     export PATH=$JAVA_HOME/bin:$PATH
-     EOF
-  when: 
-    - is_amazon_linux|bool
+  yum:
+    name:
+      - wget
+      - tar
+    state: latest
+  when: ansible_facts.pkg_mgr in ['yum','dnf']
 
-- name: configure java not amazon
-  become: yes
-  shell:
-   cmd: |
-     cat <<EOF | sudo tee /etc/profile.d/jdk17.sh
-     export JAVA_HOME=/usr/lib/jvm/jre-17-openjdk
-     export PATH=$JAVA_HOME/bin:$PATH
-     EOF
-  when: 
-    - not is_amazon_linux|bool
-
-- name: wget maven
+- name: Download & unpack Maven on RHEL/Amazon
   become: yes
   unarchive:
     src: "https://dlcdn.apache.org/maven/maven-3/{{ maven_version }}/binaries/apache-maven-{{ maven_version }}-bin.tar.gz"
     dest: /opt
     remote_src: yes
+  when: ansible_facts.pkg_mgr in ['yum','dnf']
 
-- name: create simple maven link
+- name: Symlink Maven directory on RHEL/Amazon
   become: yes
   file:
-   src: "/opt/apache-maven-{{ maven_version }}"
-   dest:  /opt/maven
-   owner: root
-   group: root
-   state: link
+    src: "/opt/apache-maven-{{ maven_version }}"
+    dest: "/opt/maven"
+    state: link
+  when: ansible_facts.pkg_mgr in ['yum','dnf']
 
-- name: configure maven
-  become: yes
-  shell:
-   cmd: |
-     cat <<EOF | sudo tee /etc/profile.d/maven.sh
-     export JAVA_HOME=/usr/lib/jvm/jre-17-openjdk
-     export M2_HOME=/opt/maven
-     export MAVEN_HOME=/opt/maven
-     export PATH=\$PATH:\$M2_HOME/bin
-     EOF
-
-- name: chmod maven
-  become: yes
+# --------------------------
+#  Environment setup
+# --------------------------
+- name: Create binaries dir
   file:
-   dest: /etc/profile.d/maven.sh
-   state: touch
-   mode: +x
+    path: "/home/{{ login_username }}/binaries"
+    owner: "{{ login_username }}"
+    group: "{{ login_username }}"
+    mode: '0755'
+    state: directory
+
+- name: Configure JAVA_HOME
+  become: yes
+  copy:
+    dest: /etc/profile.d/jdk17.sh
+    mode: '0755'
+    content: |
+      {% if ansible_facts.pkg_mgr == 'apt' %}
+      export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      {% elif ansible_facts['distribution'] == 'Amazon' %}
+      export JAVA_HOME=/usr/lib/jvm/java-17-amazon-corretto
+      {% else %}
+      export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
+      {% endif %}
+      export PATH=$JAVA_HOME/bin:$PATH
+
+- name: Configure MAVEN_HOME
+  become: yes
+  copy:
+    dest: /etc/profile.d/maven.sh
+    mode: '0755'
+    content: |
+      export M2_HOME=/opt/maven
+      export MAVEN_HOME=/opt/maven
+      export PATH=$PATH:$M2_HOME/bin

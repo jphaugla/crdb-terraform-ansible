@@ -1,36 +1,83 @@
-- name: install grafana key
-  become: yes
-  shell:
-    cmd:  wget -qO gpg.key https://rpm.grafana.com/gpg.key
+---
+# roles/app-prometheus/tasks/install-grafana.yml
 
-- name: add repository
+- name: Debug OS information
   become: yes
-  shell:
-    cmd: rpm --import gpg.key
-  ignore_errors: yes
+  ansible.builtin.debug:
+    msg: "Distribution={{ ansible_facts['distribution'] }}  pkg_mgr={{ ansible_facts['pkg_mgr'] }}"
 
-- name: add grafana repo
+# ----------------------------------------
+# RHEL/CentOS (yum/dnf) path
+# ----------------------------------------
+- name: Import Grafana GPG key (RHEL/CentOS)
+  become: yes
+  shell: rpm --import https://rpm.grafana.com/gpg.key
+  when: ansible_facts['pkg_mgr'] in ['yum','dnf']
+
+- name: Add Grafana YUM repo
   become: yes
   ansible.builtin.template:
-    src: grafana.repo.j2 
+    src: grafana.repo.j2
     dest: /etc/yum.repos.d/grafana.repo
-    owner: root
-    group: root
-    mode: 0644
+    mode: '0644'
+  when: ansible_facts['pkg_mgr'] in ['yum','dnf']
 
-- name: Install the latest version of grafana
+- name: Install Grafana (RHEL/CentOS)
   become: yes
   ansible.builtin.dnf:
     name: grafana
     state: latest
+  when: ansible_facts['pkg_mgr'] in ['yum','dnf']
 
-- name: Create systemd service unit for grafana
+# ----------------------------------------
+# Debian/Ubuntu (apt) path
+# ----------------------------------------
+- name: Install prerequisites for apt (Debian/Ubuntu)
+  become: yes
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - software-properties-common
+      - wget
+    state: latest
+    update_cache: yes
+  when: ansible_facts['pkg_mgr'] == 'apt'
+
+- name: Add Grafana GPG key (Debian/Ubuntu)
+  become: yes
+  ansible.builtin.apt_key:
+    url: https://packages.grafana.com/gpg.key
+    state: present
+  when: ansible_facts['pkg_mgr'] == 'apt'
+
+- name: Add Grafana APT repo (Debian/Ubuntu)
+  become: yes
+  ansible.builtin.apt_repository:
+    repo: deb https://packages.grafana.com/oss/deb stable main
+    filename: grafana
+    state: present
+  when: ansible_facts['pkg_mgr'] == 'apt'
+
+- name: Update apt cache (Debian/Ubuntu)
+  become: yes
+  ansible.builtin.apt:
+    update_cache: yes
+  when: ansible_facts['pkg_mgr'] == 'apt'
+
+- name: Install Grafana (Debian/Ubuntu)
+  become: yes
+  ansible.builtin.apt:
+    name: grafana
+    state: latest
+  when: ansible_facts['pkg_mgr'] == 'apt'
+
+# ----------------------------------------
+# Common tasks
+# ----------------------------------------
+- name: Create systemd service unit for Grafana
   become: yes
   ansible.builtin.template:
     src: grafana.service.j2
     dest: /etc/systemd/system/grafana-server.service
-    owner: root
-    group: root
-    mode: 0644
-  notify:
-    - restart grafana-server
+    mode: '0644'
+  notify: restart grafana-server

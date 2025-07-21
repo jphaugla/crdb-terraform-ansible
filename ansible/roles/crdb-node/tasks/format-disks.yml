@@ -1,39 +1,34 @@
+---
 - name: Verify the disk exists
   become: yes
   command: lsblk -no NAME "{{ disk_device }}"
   register: disk_check
   failed_when: disk_check.rc != 0
 
-- name: Check if the partition exists
-  become: yes
-  command: lsblk -no NAME "{{ disk_device }}1"
-  register: partition_check
-  failed_when: false
-  changed_when: false
-
-- name: Partition the disk if not already partitioned
-  become: yes
-  shell: |
-    echo -e "n\np\n1\n\n\nw" | fdisk "{{ disk_device }}"
-  when: "'%s1' % (disk_device | basename) not in partition_check.stdout"
-
-- name: Reload partition table
-  become: yes
-  command: partprobe "{{ disk_device }}"
-  when: "'%s1' % (disk_device | basename) not in partition_check.stdout"
+- name: Normalize disk path (partition vs raw)
+  set_fact:
+    target_device: >-
+      {{
+        (disk_device + '1')
+        if (
+          ansible_devices[disk_device | basename].partitions is defined
+          and ansible_devices[disk_device | basename].partitions | length > 0
+        )
+        else disk_device
+      }}
 
 - name: Check current filesystem type
   become: yes
-  command: blkid -s TYPE -o value "{{ disk_device }}1"
+  command: blkid -s TYPE -o value "{{ target_device }}"
   register: fs_check
   failed_when: false
   changed_when: false
 
-- name: Format the partition if not already formatted or if filesystem differs
+- name: Format the disk if not already formatted or if filesystem differs
   become: yes
   filesystem:
     fstype: xfs
-    dev: "{{ disk_device }}1"
+    dev: "{{ target_device }}"
     force: true
   when: fs_check.stdout is undefined or fs_check.stdout != "xfs"
 
@@ -43,9 +38,9 @@
     path: "{{ crdb_file_location }}"
     state: directory
 
-- name: Check if the partition is mounted
+- name: Check if the disk is mounted
   become: yes
-  shell: mount | grep -w "{{ disk_device }}1"
+  shell: mount | grep -w "{{ target_device }}"
   register: mount_check
   failed_when: false
   changed_when: false
@@ -54,15 +49,15 @@
   become: yes
   mount:
     path: "{{ crdb_file_location }}"
-    src: "{{ disk_device }}1"
+    src: "{{ target_device }}"
     fstype: xfs
     opts: defaults
     state: mounted
   when: mount_check.stdout == ""
 
-- name: Fetch partition UUID
+- name: Fetch disk UUID
   become: yes
-  command: blkid -s UUID -o value "{{ disk_device }}1"
+  command: blkid -s UUID -o value "{{ target_device }}"
   register: blkid_output
 
 - name: Ensure fstab entry exists

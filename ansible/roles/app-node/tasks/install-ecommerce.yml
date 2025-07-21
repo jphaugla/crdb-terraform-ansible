@@ -1,13 +1,17 @@
-# install npm depencies for nextEcommerce
 - name: Install npm dependencies (nextEcommerce)
-  shell: npm install
+  tags: Install_ecommerce
+  shell: |
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    nvm use {{ node_version }}
+    cd /opt/nextEcommerce
+    npm install
   args:
-    chdir: "/opt/nextEcommerce"
     executable: /bin/bash
-  environment:
-    HOME: "/home/{{ login_username }}"
-- name: save environment script
+
+- name: Save environment script for nextEcommerce
+  tags: Install_ecommerce
   copy:
-    content: "{{ lookup('template','setEenv.j2') }}"
     dest: /opt/nextEcommerce/.env
-    mode: '0755'
+    mode: '0644'
+    content: "{{ lookup('template', 'setEenv.j2') }}"

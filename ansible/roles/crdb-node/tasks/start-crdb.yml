@@ -12,9 +12,40 @@
   ansible.builtin.systemd:
     daemon_reload: yes
 
-- name: Enable & start cockroach.service
+- name: Try to start cockroach.service (allow failure so we can fetch logs)
   become: yes
   ansible.builtin.systemd:
     name: cockroach.service
-    enabled: yes
     state: started
+  register: crdb_start
+  ignore_errors: yes
+
+- name: Dump `systemctl status` for cockroach.service
+  when: crdb_start.failed
+  become: yes
+  ansible.builtin.command: systemctl status cockroach.service --no-pager
+  register: crdb_status
+  changed_when: false
+
+- name: Show cockroach.service status
+  when: crdb_start.failed
+  ansible.builtin.debug:
+    var: crdb_status.stdout_lines
+
+- name: Dump journal for cockroach.service
+  when: crdb_start.failed
+  become: yes
+  ansible.builtin.command: journalctl -xeu cockroach.service --no-pager | tail -n 50
+  register: crdb_journal
+  changed_when: false
+
+- name: Show recent journal entries
+  when: crdb_start.failed
+  ansible.builtin.debug:
+    var: crdb_journal.stdout_lines
+
+- name: Fail play if cockroach still didn’t start
+  when: crdb_start.failed
+  ansible.builtin.fail:
+    msg: "cockroach.service failed to start; see above logs for details"
+

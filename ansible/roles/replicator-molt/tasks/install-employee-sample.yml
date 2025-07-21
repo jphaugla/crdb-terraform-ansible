@@ -1,38 +1,35 @@
-- name: get employee dump file
-  get_url:
-    url: https://raw.githubusercontent.com/neondatabase/postgres-sample-dbs/main/employees.sql.gz
-    dest: /tmp/employees.sql.gz
-    mode: '0755'
+---
+# roles/replicator-molt/tasks/install-employee-sample.yml
 
-- name: copy create if not exist database command for postgres
-  template:
-    src: createDB.j2
-    dest: /tmp/createDB.sql
-    mode: '0755'
-  ignore_errors: true
-
-- name: create employees database if not exists for postgres
+- name: Create employees database if not exists
   become: yes
-  become_user: postgres
-  shell:
-    cmd: psql  --file /tmp/createDB.sql 
+  shell: |
+    # check+create
+    sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='employees'" \
+      | grep -q 1 \
+      || sudo -u postgres psql -c "CREATE DATABASE employees;"
+  args:
+    executable: /bin/bash
+    chdir: /tmp
 
-- name: load postgres employee dump
+- name: Load employee dump into employees DB
   become: yes
-  become_user: postgres
-  shell:
-    cmd:  pg_restore -v -d employees -Fc  /tmp/employees.sql.gz --no-privileges --no-owner -c
-  ignore_errors: true
+  shell: |
+    # decompress and restore
+    gunzip -c /tmp/employees.sql.gz | sudo -u postgres pg_restore \
+      --verbose --clean --no-privileges --no-owner --dbname=employees
+  args:
+    executable: /bin/bash
+    chdir: /tmp
+  register: restore_result
+  failed_when: restore_result.rc not in [0,1]
 
-- name: copy move schema
-  copy:
-    src: moveSchema.sql
-    dest: /tmp/moveSchema.sql
-    mode: '0755'
-
-- name: move the schema to public
+- name: Move the schema to public
   become: yes
-  become_user: postgres
-  shell:
-    cmd: psql -d employees --file /tmp/moveSchema.sql 
-
+  shell: |
+    sudo -u postgres psql --dbname=employees <<-'SQL'
+      \i /tmp/moveSchema.sql
+    SQL
+  args:
+    executable: /bin/bash
+    chdir: /tmp

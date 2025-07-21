@@ -1,3 +1,4 @@
+// terraform-aws/inventory.tf
 resource "local_file" "instances_file" {
     filename = "${var.instances_inventory_file}"
     content = templatefile("${path.module}/${var.inventory_template_file}",

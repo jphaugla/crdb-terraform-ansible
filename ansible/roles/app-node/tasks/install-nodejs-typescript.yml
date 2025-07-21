@@ -1,18 +1,22 @@
-- name: Get_nvm_install_script | {{ role_name | basename }}
+- name: Download NVM install script | {{ role_name | basename }}
   tags: Get_nvm_install_script
   get_url:
-    url: https://raw.githubusercontent.com/nvm-sh/nvm/v{{ nvm_version }}/install.sh
+    url: "https://raw.githubusercontent.com/nvm-sh/nvm/v{{ nvm_version }}/install.sh"
     dest: "/home/{{ login_username }}/nvm_install.sh"
     force: true
 
-- name: Install_or_update_nvm | {{ role_name | basename }}
+- name: Install or update NVM | {{ role_name | basename }}
   tags: Install_or_update_nvm
-  command: bash /home/{{ login_username }}/nvm_install.sh
+  shell: bash /home/{{ login_username }}/nvm_install.sh
+  args:
+    creates: "/home/{{ login_username }}/.nvm"
 
-- name: Install_nodejs | {{ role_name | basename }}
+- name: Install Node.js {{ node_version }} via NVM | {{ role_name | basename }}
   tags: Install_nodejs
   shell: |
-    source /home/{{ login_username }}/.nvm/nvm.sh
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
     nvm install {{ node_version }}
+    nvm alias default {{ node_version }}
   args:
     executable: /bin/bash
