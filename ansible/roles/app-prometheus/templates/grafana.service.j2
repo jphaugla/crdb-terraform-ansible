@@ -6,25 +6,36 @@ After=network-online.target
 After=postgresql.service mariadb.service mysqld.service influxdb.service
 
 [Service]
-EnvironmentFile=/etc/sysconfig/grafana-server
+# Make the env file optional and Debian-compatible
+EnvironmentFile=-/etc/default/grafana-server
+
 User=grafana
 Group=grafana
-Type=notify
+Type=Simple
 Restart=on-failure
+NotifyAccess=main
+
+# ensure you're in the grafana home
 WorkingDirectory=/usr/share/grafana
+
+# runtime directories
 RuntimeDirectory=grafana
 RuntimeDirectoryMode=0750
-ExecStart=/usr/share/grafana/bin/grafana server                                     \
-                            --config=${CONF_FILE}                                   \
-                            --pidfile=${PID_FILE_DIR}/grafana-server.pid            \
-                            --packaging=rpm                                         \
-                            cfg:default.paths.logs=${LOG_DIR}                       \
-                            cfg:default.paths.data=${DATA_DIR}                      \
-                            cfg:default.paths.plugins=${PLUGINS_DIR}                \
-                            cfg:default.paths.provisioning=${PROVISIONING_CFG_DIR}
+
+# Use the Grafana binary we discovered in Ansible
+ExecStart={{ grafana_server_path }} \
+  --homepath=/usr/share/grafana \
+  --config=${CONF_FILE} \
+  --pidfile=${PID_FILE_DIR}/grafana-server.pid \
+  --packaging=rpm \
+  cfg:default.paths.logs=${LOG_DIR} \
+  cfg:default.paths.data=${DATA_DIR} \
+  cfg:default.paths.plugins=${PLUGINS_DIR} \
+  cfg:default.paths.provisioning=${PROVISIONING_CFG_DIR}
 
 LimitNOFILE=10000
 TimeoutStopSec=20
+
 CapabilityBoundingSet=
 DeviceAllow=
 LockPersonality=true
@@ -51,3 +62,4 @@ UMask=0027
 
 [Install]
 WantedBy=multi-user.target
+

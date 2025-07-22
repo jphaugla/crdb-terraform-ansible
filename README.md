@@ -31,28 +31,33 @@
       - [Running molt-replicator](#running-molt-replicator) 
       - [molt-replicator links](#molt-replicator-links)
 ## Directory structure
-Currently, this deployment github only supports AZURE but that will change to next include AWS and finally GCP.  The goal is 
-to have minimal changes to the ansible for each of the cloud providers and this will be automated.  The subdirectories are:
+Currently, this supports AZURE, AWS and GCP now.  For AWS and AZURE, the cloud provider load balancer can be used instead of haproxy.  For GCP, the cloud provider load balancer is not yet supported.
+The goal is to have minimal changes to the ansible for each of the cloud providers.  The subdirectories are:
 * [ansible](ansible) contains the ansible scripts
-* [terraform-aws](terraform-aws) contains the aws terraform code (not completed)
+* [terraform-aws](terraform-aws) contains the aws terraform code
+* [multiregionAWS](multiregionAWS) contains aws multi-region terraform code
 * [terraform-azure](terraform-azure) contains the azure terraform code
+* [terraform-gcp](terraform-gcp) contains the gcp terraform code
 
 ![Resources Created in the Terraform HCL](resources/azure-single-regon.drawio.png)
 
-Terraform HCL to create a multi-node CockroachDB cluster in Azure.   The number of nodes can be a multiple of 3 and nodes will be evenly distributed between 3 Azure Zones.   Optionally, you can include
+Terraform HCL to create a multi-node CockroachDB cluster..   The number of nodes can be a multiple of 3 and nodes will be evenly distributed between 3 Azure Zones.   Optionally, you can include
  - haproxy VM - the proxy will be configured to connect to the cluster
  - app VM - application node that includes software for a multi-region demo
+ - load balancer - for AWS and Azure, can use cloud provider load balancer instead of haproxy
 
 ## Security Notes
 - `firewalld` has been disabled on all nodes (cluster, haproxy and app).   
 - A security group is created and assigned with ports 22, 8080 and 26257 opened to a single IP address.  The address is configurable as an input variable (my-ip-address)  
 
 ## Using the Terraform HCL
-To use the HCL, you will need to define an Azure SSH Key -- that will be used for all VMs created to provide SSH access.
+To use the HCL, you will need to define an SSH Key -- that will be used for all VMs created to provide SSH access.
+This is simple in both Azure and AWS but a bit more difficult in GCP.  In GCP, it was much easier to create the ssh key with
+the gcloud api than to do this in the UI.
 
 ### Run this Terraform Script
 ```terraform
-# See the appendix below to intall Terrafrom, the Azure CLI and logging in to Azure
+# See the appendix below to intall Terraform, the Cloud CLIs and logging in to Cloud platforms
 
 git clone https://github.com/jphaugla/crdb-terraform-ansible.git
 cd crdb-terraform-ansible/
@@ -65,8 +70,8 @@ add the enterprise license and the cluster organization to the following files i
 [cluster_organization](ansible/temp)   
 #### Prepare
 * Use the terraform/ansible deployment using the subdirectories [region1](terraform-azure/region1) and/or [region2](terraform-azure/region2) in the deployment github
-* Can enable/disable deployment of Kafka by setting the *include_ha_proxy* flag to "no" in [deploy main.tf](terraform-azure/region1/main.tf)
-* Can enable/disable deployent of replicator using *start_replicator* flag in [main.tf](terraform-azure/region1/main.tf)
+* Can enable/disable deployment of haproxy by setting the *include_ha_proxy* flag to "no" in [deploy main.tf](terraform-azure/region1/main.tf)
+* Can enable/disable deployment of replicator using *start_replicator* flag in [main.tf](terraform-azure/region1/main.tf)
 * Ensure *install_enterprise_keys* is set in [main.tf](terraform-azure/region1/main.tf)
 * Depending on needs, decide whether to deploy kafka setting the *include_kafka* to yes or no in [main.tf](terraform-azure/region1/main.tf)
 * Look up the IP address of your client workstation and put that IP address in *my_ip_address*
@@ -116,6 +121,7 @@ Prometheus and Grafana are configured and started by the ansible scripts.  Both 
 terraform destroy
 ```
 ## Deploy to 2 regions with replicator
+This is no longer a recommended pattern now that LDR and PCR have been released 
 
 ### Run Terraform
 *  terraform apply in each region directory-reference the steps [noted above](#run-this-terraform-script)
@@ -253,10 +259,18 @@ https://github.com/guillermo-musumeci/terraform-azure-vm-bootstrapping-2/blob/ma
 * Can use either of the regions subdirectories to kick off the deployment.  Both regions are defined to enable replicator deployment
   * [region1](terraform-azure/region1/main.tf) 
   * [region2](terraform-azure/region2/main.tf)
-* These files connect terraform and ansible
+* These files connect terraform and ansible for azure
   * template file at [inventory.tpl](terraform-azure/templates/inventory.tpl)
   * [provisioning.tf](terraform-azure/provisioning.tf) 
   * [inventory.tf](terraform-azure/inventory.tf)
+* These files connect terraform and ansible for aws
+  * template file at [inventory.tpl](terraform-aws/templates/inventory.tpl)
+  * [provisioning.tf](terraform-aws/provisioning.tf)
+  * [inventory.tf](terraform-aws/inventory.tf)
+* These files connect terraform and ansible for gcp
+  * template file at [inventory.tpl](terraform-gcp/templates/inventory.tpl)
+  * [provisioning.tf](terraform-gcp/provisioning.tf)
+  * [inventory.tf](terraform-gcp/inventory.tf)
 * Ansible code is in the [provisioners/roles](ansible/roles) subdirectory
   * [playbook.yml](ansible/playbook.yml) 
     * Each node group has ansible code to export the node's private and public ip addresses to a region subdirectory under [ansible/temp](ansible/temp)
@@ -279,6 +293,7 @@ https://github.com/guillermo-musumeci/terraform-azure-vm-bootstrapping-2/blob/ma
       * [confluent add connectors](ansible/roles/kafka-node/tasks/confluent-add-connectors.yml)
     * [crdb-node](ansible/roles/crdb-node)
       * For using replicator, a changefeed script is [created](ansible/roles/kafka-node/tasks/main.yml) using a [j2 template](provisioners/roles/crdb-node/templates/create-changefeed.j2)
+    * [prometheus](ansible/roles/app-prometheus)
   * Under each of these node groups
     * A vars/main.yml file has variable flags to enable/disable processing
     * A tasks/main.yml calls the required tasks to do the actual processing
@@ -289,8 +304,9 @@ https://github.com/guillermo-musumeci/terraform-azure-vm-bootstrapping-2/blob/ma
 * This github enables but does not fully automate migration and replication from PostgreSQL to CockroachDB
   * On AWS, an S3 bucket is created to enable the migration
   * Scripts are created on the application node with the correct connection strings for this github's deployments
+  * On Azure, an Azure Block Storage bucket is created
 ### Running molt-replicator
-To run molt-replicator (NOTE: currently this only works when deploying on AWS)
+To run molt-replicator (NOTE: currently this only works when deploying on AWS but won't fail ansible parts on GCP or Azure)
 * Turn on the processing for molt-replicator with the terraform variable *setup_migration* in [main.tf](https://github.com/jphaugla/crdb-terraform-ansible/blob/main/terraform-aws/region1/main.tf)
 * Use the scripts created on the application node in /home/ec2-user/
 NOTE:  for each of these scripts, I have linked the ansible template (j2) or  file that is used to create this shell script.  Hope this helps with understanding for the reader.

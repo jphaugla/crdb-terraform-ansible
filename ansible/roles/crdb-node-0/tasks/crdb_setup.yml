@@ -8,11 +8,10 @@
     src: create_user.j2
     dest: create_user.sql    
 
-#  ignore errors because of retry.  
+#  fixed this to be an upsert
 - name: install system locations
   shell:
     cmd: "cockroach sql --certs-dir=certs --file=system_locations.sql"
-  ignore_errors: true
 
 - name: create admin user
   shell:

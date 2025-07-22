@@ -7,7 +7,7 @@
     msg: "Distribution={{ ansible_facts['distribution'] }}  pkg_mgr={{ ansible_facts['pkg_mgr'] }}"
 
 # ----------------------------------------
-# RHEL/CentOS (yum/dnf) path
+# Install the package
 # ----------------------------------------
 - name: Import Grafana GPG key (RHEL/CentOS)
   become: yes
@@ -29,9 +29,6 @@
     state: latest
   when: ansible_facts['pkg_mgr'] in ['yum','dnf']
 
-# ----------------------------------------
-# Debian/Ubuntu (apt) path
-# ----------------------------------------
 - name: Install prerequisites for apt (Debian/Ubuntu)
   become: yes
   ansible.builtin.apt:
@@ -72,8 +69,38 @@
   when: ansible_facts['pkg_mgr'] == 'apt'
 
 # ----------------------------------------
-# Common tasks
+# Discover the grafana-server binary
 # ----------------------------------------
+- name: Locate grafana-server executable
+  become: yes
+  ansible.builtin.find:
+    paths:
+      - /usr/sbin
+      - /usr/share/grafana/bin
+    patterns: grafana-server
+    file_type: file
+    recurse: no
+  register: grafana_bins
+
+- name: Fail if grafana-server not found
+  ansible.builtin.fail:
+    msg: "grafana-server binary not found under /usr/sbin or /usr/share/grafana/bin"
+  when: grafana_bins.matched == 0
+
+- name: Set grafana_server_path fact
+  ansible.builtin.set_fact:
+    grafana_server_path: "{{ grafana_bins.files[0].path }}"
+
+# ----------------------------------------
+# Common tasks: environment & systemd unit
+# ----------------------------------------
+- name: Ensure Grafana environment file exists
+  become: yes
+  ansible.builtin.file:
+    path: /etc/default/grafana-server
+    state: touch
+    mode: '0644'
+
 - name: Create systemd service unit for Grafana
   become: yes
   ansible.builtin.template:
