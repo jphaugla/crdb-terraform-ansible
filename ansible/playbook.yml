@@ -1,3 +1,12 @@
+- hosts: app_node_ips
+  gather_facts: no
+
+  pre_tasks:
+    - name: Wait for SSH connectivity
+      wait_for_connection:
+        delay: 5
+        timeout: 300
+        sleep: 5
 - hosts: all_public_node_ips
   gather_facts: True
   roles:

@@ -19,11 +19,8 @@
       - [Specific Steps for Dashboards](#specific-steps-for-github)
   - [Technical Documentation](#technical-documentation)
     - [Azure Documentation](#azure-documentation)
-      - [resize disk](#terraform-variable-crdbresizehomelv)
-      - [Finding Images](#finding-images)
-      - [Install Terraform](#install-terraform) 
-      - [Install Azure CLI](#install-azure-cli)
-      - [Azure Links](#azure-links)
+    - [AWS Documentation](#aws-documentation)
+    - [GCP Documentation](#gcp-documentation)
     - [CockroachDB Links](#cockroachdb-links)
     - [Other Links](#general-links)
     - [Terraform/Ansible Description](#terraformansible-documentation)
@@ -35,11 +32,11 @@ Currently, this supports AZURE, AWS and GCP now.  For AWS and AZURE, the cloud p
 The goal is to have minimal changes to the ansible for each of the cloud providers.  The subdirectories are:
 * [ansible](ansible) contains the ansible scripts
 * [terraform-aws](terraform-aws) contains the aws terraform code
-* [multiregionAWS](multiregionAWS) contains aws multi-region terraform code
+* [multiregionAWS](multiregionAWS) contains aws multi-region terraform code.  Smaller terraform code using terraform-aws folder but for multi-region
 * [terraform-azure](terraform-azure) contains the azure terraform code
 * [terraform-gcp](terraform-gcp) contains the gcp terraform code
+* mutiregionGCP and multireginAzure will come soon...
 
-![Resources Created in the Terraform HCL](resources/azure-single-regon.drawio.png)
 
 Terraform HCL to create a multi-node CockroachDB cluster..   The number of nodes can be a multiple of 3 and nodes will be evenly distributed between 3 Azure Zones.   Optionally, you can include
  - haproxy VM - the proxy will be configured to connect to the cluster
@@ -48,12 +45,12 @@ Terraform HCL to create a multi-node CockroachDB cluster..   The number of nodes
 
 ## Security Notes
 - `firewalld` has been disabled on all nodes (cluster, haproxy and app).   
-- A security group is created and assigned with ports 22, 8080 and 26257 opened to a single IP address.  The address is configurable as an input variable (my-ip-address)  
+- A security group is created and assigned with ports 22, 8080, 3000 and 26257 opened to a single IP address.  The address is configurable as an input variable (my-ip-address)  
 
 ## Using the Terraform HCL
 To use the HCL, you will need to define an SSH Key -- that will be used for all VMs created to provide SSH access.
 This is simple in both Azure and AWS but a bit more difficult in GCP.  In GCP, it was much easier to create the ssh key with
-the gcloud api than to do this in the UI.
+the gcloud api than to do this in the UI.  The main.tf file for each deployment has a key name as well as a full path to the SSH key file.
 
 ### Run this Terraform Script
 ```terraform
@@ -65,14 +62,19 @@ cd crdb-terraform-ansible/
 
 #### if you intend to use enterprise features of the database
 This has changed with new enterprise license requirements.  Can now use without adding a license for an initial time period
-add the enterprise license and the cluster organization to the following files in the region subdirectory under provisioners/temp So for example if the region is centralus, add the contents of your licence key to a file in provisioners/temp/centralus/enterprise_license
+add the enterprise license and the cluster organization to the following files in the region subdirectory under provisioners/temp So, for example, if the region is centralus, add the contents of your licence key to a file in provisioners/temp/centralus/enterprise_license
 [enterprise_license](ansible/temp)   
 [cluster_organization](ansible/temp)   
 #### Prepare
-* Use the terraform/ansible deployment using the subdirectories [region1](terraform-azure/region1) and/or [region2](terraform-azure/region2) in the deployment github
+* Use the terraform/ansible deployment using the appropriate subdirectories for selected cloud provider and single or multi-region
+  * [Azure single region](terraform-azure/region1) 
+  * [AWS single region](terraform-aws/region1)
+  * [AWS multi-region](multiregionAWS/test)
+  * [GCP single region](terraform-gcp/region1)
+* Valid the parameters in the main.tf in each of the chosen directory
 * Can enable/disable deployment of haproxy by setting the *include_ha_proxy* flag to "no" in [deploy main.tf](terraform-azure/region1/main.tf)
 * Can enable/disable deployment of replicator using *start_replicator* flag in [main.tf](terraform-azure/region1/main.tf)
-* Ensure *install_enterprise_keys* is set in [main.tf](terraform-azure/region1/main.tf)
+* Optionally can set *install_enterprise_keys* in [main.tf](terraform-azure/region1/main.tf)
 * Depending on needs, decide whether to deploy kafka setting the *include_kafka* to yes or no in [main.tf](terraform-azure/region1/main.tf)
 * Look up the IP address of your client workstation and put that IP address in *my_ip_address*
   * This allows your client workstation to access the nodes through their public IP address
@@ -81,9 +83,8 @@ add the enterprise license and the cluster organization to the following files i
   * if no need for the application to run, kill the pid.  Easy to find the pid by doing a grep on java and killing the application job
 
 #### Kick off terraform script
-modify [main.tf](terraform-azure/region1/main.tf)
+make sure to be in the subdirectory chosen above before running these commands
 ```
-cd region1
 terraform init
 terraform plan
 terraform apply
@@ -99,7 +100,7 @@ Detailed steps are documented in the following grafana links for cockroachDB and
 #### Specific steps for github
 Prometheus and Grafana are configured and started by the ansible scripts.  Both are running as services on the haproxy node
 * Look up the haproxy node address in the region subdirectory under [provisioners/temp](ansible/temp)
-* Start the grafana interface using [grafana ui](localhost:3000).  
+* Start the grafana interface using [grafana ui](http://localhost:3000).  
   * This grafana ui is the haproxy external node ip at port 3000
 * Change the admin login password (original login is the installation default of admin/admin)
 * [configure prometheus data source for grafana](https://grafana.com/docs/grafana/latest/datasources/prometheus/configure-prometheus-data-source/)
@@ -109,7 +110,7 @@ Prometheus and Grafana are configured and started by the ansible scripts.  Both 
     * scrolling to the bottom of the UI window
     * Click save and test
 * [import grafana dashboards](https://grafana.com/docs/grafana/latest/dashboards/build-dashboards/import-dashboards/)
-  * From the same grafana interface at [grafana ui](localhost:3000), Click on *Dashboards* using the above instructions
+  * From the same grafana interface at [grafana ui](http://localhost:3000), Click on *Dashboards* using the above instructions
   * CockroachDB and replicator/terminator grafana dashboards are available within [grafana dashboards folder](scripts/grafana_dashboards)
     * These could be stale.  Refresh this folder using the [getGrafanaDashboards.sh](scripts/getGrafanaDashboards.sh)
     * import all the dashboards.  One of them is for replicator and the rest are cockroachDB dashboards
@@ -122,6 +123,8 @@ terraform destroy
 ```
 ## Deploy to 2 regions with replicator
 This is no longer a recommended pattern now that LDR and PCR have been released 
+Using this same 2 region deployment can set up LDR with [these scripts](scripts/setupLDR)
+
 
 ### Run Terraform
 *  terraform apply in each region directory-reference the steps [noted above](#run-this-terraform-script)
@@ -209,21 +212,15 @@ or run sample kv workload from the adminuser home in the application node applic
 ## Technical Documentation
 
 ### Azure Documentation
-#### terraform variable crdb_resize_homelv
-In Azure, any additional space allocated to a disk beyond the size of the image, is available but unused.  Setting the variable `crdb_resize_homelv` to "yes", will cause the user_data script to attempt to resize the home logical volume to take advantage of the additional space.  This is potentially dangerous and should only be used if you're sure that sda2 is the volume group with the homelv partition.  Typically, if you're using the standard redhat source image defined in by the instance.tf you should be fine.
-
 #### Finding images
 ```
 az vm image list -p "Canonical"
 az vm image list -p "Microsoft"
 ```
 
-#### Install Terraform
-sudo yum install -y yum-utils
-sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
-sudo yum -y install terraform
-
 #### Install Azure CLI
+* [Install Azure CLI using homebrew](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-macos?view=azure-cli-latest)
+* Install Azure CLI manually
 sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
 for RHEL 8
 sudo dnf install -y https://packages.microsoft.com/config/rhel/8/packages-microsoft-prod.rpm
@@ -240,6 +237,56 @@ Sizes for VM machines (not very helpful)
 https://learn.microsoft.com/en-us/azure/virtual-machines/sizes
 User Data that is a static SH 
 https://github.com/guillermo-musumeci/terraform-azure-vm-bootstrapping-2/blob/master/linux-vm-main.tf
+### AWS Documentation
+#### Install AWS CLI
+[Install AWS CLI using homebrew](https://formulae.brew.sh/formula/awscli)
+
+#### AWS Links
+AWS Terraform Docs
+https://registry.terraform.io/providers/hashicorp/aws/latest/docs
+Amazon EC2 instance types
+https://aws.amazon.com/ec2/instance-types/
+##### Finding AWS images
+```bash
+aws ec2 describe-images \
+  --owners amazon \
+  --filters \
+    "Name=name,Values=al2023-ami-2023*" \
+    "Name=architecture,Values=x86_64" \
+    "Name=virtualization-type,Values=hvm" \
+  --query "sort_by(Images, &CreationDate)[-1].ImageId" \
+  --output text
+aws ec2 describe-images \
+  --owners amazon \
+  --filters \
+    "Name=name,Values=al2023-ami-2023*" \
+    "Name=architecture,Values=arm64" \
+    "Name=virtualization-type,Values=hvm" \
+  --query "sort_by(Images, &CreationDate)[-1].ImageId" \
+  --output text
+aws ec2 describe-images \
+  --owners 099720109477 \
+  --filters \
+    "Name=name,Values=ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-2025*" \
+  --query "sort_by(Images, &CreationDate)[-1].ImageId" \
+  --output text
+```
+### GCP Documentation
+#### Install GCP CLI
+[homebrew install](https://formulae.brew.sh/cask/gcloud-cli)
+[manual install](https://cloud.google.com/sdk/docs/install-sdk)
+#### GCP Links
+GCP Terraform Docs
+https://registry.terraform.io/providers/hashicorp/google/latest/docs
+GCP Compute Engine Types
+https://cloud.google.com/compute/docs/machine-resource
+#### Finding GCP images
+```bash
+gcloud compute images list \
+--project=ubuntu-os-cloud \
+--filter="family:( ubuntu-2204-lts )" \
+--format="table[box](name, family, creationTimestamp)"
+```
 
 #### CockroachDB Links
 * [CockroachDB Grafana dashboards](https://www.cockroachlabs.com/docs/stable/monitor-cockroachdb-with-prometheus#step-5-visualize-metrics-in-grafana)
@@ -303,7 +350,7 @@ https://github.com/guillermo-musumeci/terraform-azure-vm-bootstrapping-2/blob/ma
 * 2 region/DC deployments of CockroachDB use Logical Data Replication or Physical Cluster Replication [see below](#two-datacenter-solutions)
 * This github enables but does not fully automate migration and replication from PostgreSQL to CockroachDB
   * On AWS, an S3 bucket is created to enable the migration
-  * Scripts are created on the application node with the correct connection strings for this github's deployments
+  * Scripts are created on the application node with the correct connection strings for an AWS deployment
   * On Azure, an Azure Block Storage bucket is created
 ### Running molt-replicator
 To run molt-replicator (NOTE: currently this only works when deploying on AWS but won't fail ansible parts on GCP or Azure)

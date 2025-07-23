@@ -1,16 +1,21 @@
-- name: change selinux setting to allow haproxy to connect to any port
+- name: Change selinux setting to allow haproxy to connect to any port
   become: yes
-  command: setsebool -P haproxy_connect_any=1
+  ansible.builtin.command: setsebool -P haproxy_connect_any=1
   when:
     - ansible_selinux is defined
     - ansible_selinux.status == "enabled"
 
-- name: run haproxy
+- name: Ensure haproxy is enabled and running
   become: yes
-  shell:
-    cmd: systemctl start haproxy
+  ansible.builtin.service:
+    name: haproxy
+    enabled: yes
+    state: started
 
-- name: enable haproxy
+# handlers/main.yml
+# -----------------
+- name: Reload haproxy
   become: yes
-  shell:
-    cmd: systemctl enable haproxy
+  ansible.builtin.service:
+    name: haproxy
+    state: reloaded
