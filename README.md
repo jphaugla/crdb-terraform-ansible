@@ -1,5 +1,13 @@
 # crdb-terraform-ansible
 
+## Overview
+This repository provides a turnkey, cross-cloud deployment of multi-node CockroachDB clusters using Terraform and Ansible. 
+It includes provider-specific Terraform modules for AWS, Azure, and GCP (with optional multi-region replicator), 
+plus Ansible roles to configure CockroachDB nodes, HAProxy (or cloud load balancers), Kafka, and an application tier. 
+Out-of-the-box monitoring is set up via Prometheus and Grafana, with dashboards for both CockroachDB and a sample 
+“Digital Banking” Java app. Additional sample applications and programming tools are also installed on the application node.
+Advanced features like ChangeFeeds, replicator/molt for PostgreSQL migrations, and 
+logical/physical replication are also scaffolded for zero-downtime migrations and multi-datacenter deployments.
 ## Outline
 - [Security Notes](#security-notes) 
 - [Directory Structure](#directory-structure)
