@@ -1,7 +1,7 @@
 [kafka_node_ips]
 ${kafka_public_ip}
 [crdb_node_ips]
-${crdb_public_ips}
+${crdb_public_ips_un}
 [crdb_node_ips_0]
 ${crdb_public_ips_0}
 [haproxy_node_ips]

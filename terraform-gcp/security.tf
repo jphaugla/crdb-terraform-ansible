@@ -4,7 +4,7 @@ resource "google_compute_firewall" "intra" {
   network = google_compute_network.main.name
   allow {
     protocol = "tcp"
-    ports    = ["26257", "8080"]
+    ports    = ["26257", "8080", "9092"]
   }
   source_ranges = [var.vpc_cidr]
 }
