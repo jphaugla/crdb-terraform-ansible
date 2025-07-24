@@ -8,7 +8,7 @@ Out-of-the-box monitoring is set up via Prometheus and Grafana.  Sample applicat
 on the application node.  Advanced features like ChangeFeeds, replicator/molt for PostgreSQL migrations, and 
 logical/physical replication are also scaffolded for zero-downtime migrations and multi-datacenter deployments.
 
-![](/Users/jasonhaugland/gits/crdb-terraform-ansible/images/logo_flow.png)
+![](images/logo_flow.png)
 
 ## Outline
 - [Security Notes](#security-notes) 
