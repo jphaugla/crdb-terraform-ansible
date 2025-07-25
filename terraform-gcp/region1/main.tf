@@ -41,8 +41,9 @@ module "my_gcp" {
   # ----------------------------------------
   # Kafka
   # ----------------------------------------
-  include_kafka               = "no"
-  kafka_instance_type         = "e2-standard-4"
+  include_kafka               = "yes"
+  # Kafka struggles with the 4 vcpu version
+  kafka_instance_type         = "e2-standard-8"
 
   # ----------------------------------------
   # APP Node

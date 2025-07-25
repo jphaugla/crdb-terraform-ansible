@@ -1,0 +1,63 @@
+---
+# RHEL / CentOS / Alma / Rocky
+
+- name: Install PGDG RPM
+  become: yes
+  ansible.builtin.shell: |
+    dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+  register: pgdg_install
+  retries: 3
+  delay: 5
+  until: pgdg_install.rc == 0
+
+- name: Refresh DNF cache
+  become: yes
+  ansible.builtin.dnf:
+    update_cache: yes
+
+- name: Install postgresql-server (RHEL/CentOS)
+  become: yes
+  ansible.builtin.dnf:
+    name: postgresql15-server
+    state: present
+
+- name: Initialize PostgreSQL database (RHEL/CentOS)
+  become: yes
+  ansible.builtin.shell:
+    cmd: /usr/pgsql-15/bin/postgresql-15-setup initdb
+    creates: /var/lib/pgsql/15/data/postgresql.conf
+
+- name: Copy pg_hba.conf (RHEL/CentOS)
+  become: yes
+  ansible.builtin.copy:
+    src: pg_hba.conf
+    dest: /var/lib/pgsql/15/data/pg_hba.conf
+    owner: postgres
+    group: postgres
+    mode: '0600'
+
+- name: Start & enable PostgreSQL (RHEL/CentOS)
+  become: yes
+  ansible.builtin.systemd:
+    name: postgresql-15
+    state: started
+    enabled: yes
+
+- name: Install psycopg2-binary (RHEL/CentOS)
+  become: yes
+  ansible.builtin.pip:
+    name: psycopg2-binary
+    executable: pip3
+
+- name: Configure PostgreSQL replication settings (RHEL/CentOS/Alma/Rocky)
+  become: yes
+  ansible.builtin.blockinfile:
+    path: /var/lib/pgsql/15/data/postgresql.conf
+    marker: "# {mark} ANSIBLE MANAGED POSTGRES REPLICATION CONFIG"
+    block: |
+      # Replication settings
+      wal_level = logical
+      max_wal_senders = 3
+      max_replication_slots = 3
+      wal_keep_size = 1024
+      hot_standby = on

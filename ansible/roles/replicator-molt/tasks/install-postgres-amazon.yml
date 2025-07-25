@@ -1,0 +1,49 @@
+---
+# Amazon Linux 2 / Amazon Linux 2023
+
+- name: Install postgresql-server (Amazon)
+  become: yes
+  ansible.builtin.yum:
+    name: postgresql15-server
+    state: present
+
+- name: Initialize PostgreSQL database (Amazon)
+  become: yes
+  ansible.builtin.shell:
+    cmd: /bin/postgresql-setup initdb
+    creates: /var/lib/pgsql/data/postgresql.conf
+
+- name: Copy pg_hba.conf (Amazon)
+  become: yes
+  ansible.builtin.copy:
+    src: pg_hba.conf
+    dest: /var/lib/pgsql/data/pg_hba.conf
+    owner: postgres
+    group: postgres
+    mode: '0600'
+
+- name: Start & enable PostgreSQL (Amazon)
+  become: yes
+  ansible.builtin.systemd:
+    name: postgresql
+    state: started
+    enabled: yes
+
+- name: Install psycopg2-binary (Amazon Linux)
+  become: yes
+  ansible.builtin.pip:
+    name: psycopg2-binary
+    executable: pip3
+
+- name: Configure PostgreSQL replication settings (Amazon Linux)
+  become: yes
+  ansible.builtin.blockinfile:
+    path: /var/lib/pgsql/data/postgresql.conf
+    marker: "# {mark} ANSIBLE MANAGED POSTGRES REPLICATION CONFIG"
+    block: |
+      # Replication settings
+      wal_level = logical
+      max_wal_senders = 3
+      max_replication_slots = 3
+      wal_keep_size = 1024
+      hot_standby = on

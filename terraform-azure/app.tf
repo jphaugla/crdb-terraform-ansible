@@ -49,10 +49,10 @@ resource "azurerm_linux_virtual_machine" "app" {
     }
 
     source_image_reference {
-        offer     = "RHEL"
-        publisher = "RedHat"
-        sku       = "90-gen2"
-        version   = "latest"
+      publisher = var.test-publisher
+      offer     = var.test-offer
+      sku       = var.test-sku
+      version   = var.test-version
     }
 
     os_disk {

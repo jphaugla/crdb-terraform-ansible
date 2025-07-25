@@ -33,7 +33,7 @@ module "my_aws" {
    include_ha_proxy = "yes"
    haproxy_instance_type = "t3a.large"
 # kafka
-   include_kafka = "no"
+   include_kafka = "yes"
    kafka_instance_type = "t3a.xlarge"
 # APP Node
    include_app = "yes"
@@ -54,4 +54,5 @@ module "my_aws" {
 # Create Network load balancer
 # ----------------------------------------
    include_load_balancer           = "yes"
+   run_ansible                     = true
 }

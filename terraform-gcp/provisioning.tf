@@ -39,6 +39,7 @@ resource "null_resource" "provision" {
     google_compute_instance.crdb,
     google_compute_instance.haproxy,
     google_compute_instance.kafka,
+    local_file.instances_file,
     null_resource.validation_check,
     null_resource.dummy,
   ]

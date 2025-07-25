@@ -1,105 +1,130 @@
-- name: Debug OS information
-  ansible.builtin.debug:
-    msg: "The operating system is {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
-
-# --------------------------
-#  Install Java 17
-# --------------------------
+---
+# roles/app-node/tasks/install-java-maven-go.yml
+# -------------------------------------------------------------------
+# 1. Install Java 17
+# -------------------------------------------------------------------
 - name: Install Java 17 on Debian/Ubuntu
   become: yes
-  apt:
-    name:
-      - openjdk-17-jdk
+  ansible.builtin.apt:
+    name: openjdk-17-jdk
     state: latest
     update_cache: yes
   when: ansible_facts.pkg_mgr == 'apt'
 
 - name: Install Java 17 on RHEL/CentOS
   become: yes
-  yum:
+  ansible.builtin.yum:
     name:
       - java-17-openjdk
       - java-17-openjdk-devel
     state: latest
-  when: ansible_facts.pkg_mgr in ['yum','dnf'] and not (ansible_facts['distribution'] == 'Amazon')
+  when:
+    - ansible_facts.pkg_mgr in ['yum','dnf']
+    - ansible_facts['distribution'] != 'Amazon'
 
 - name: Install Amazon Corretto 17 (Amazon Linux)
   become: yes
-  yum:
+  ansible.builtin.yum:
     name:
       - java-17-amazon-corretto
       - java-17-amazon-corretto-devel
     state: latest
   when: ansible_facts['distribution'] == 'Amazon'
 
-# --------------------------
-#  Install Go
-# --------------------------
+# -------------------------------------------------------------------
+# 2. Install Go
+# -------------------------------------------------------------------
 - name: Install Go on Debian/Ubuntu
   become: yes
-  apt:
+  ansible.builtin.apt:
     name: golang-go
     state: latest
     update_cache: yes
   when: ansible_facts.pkg_mgr == 'apt'
 
-- name: Install Go on Amazon Linux / RHEL
+- name: Install Go on RHEL/Amazon Linux
   become: yes
-  package:
+  ansible.builtin.package:
     name: golang
     state: latest
   when: ansible_facts.pkg_mgr in ['yum','dnf']
 
-# --------------------------
-#  Install Maven
-# --------------------------
+# -------------------------------------------------------------------
+# 3. Install Maven
+# -------------------------------------------------------------------
+# 3A. Use distro package for Debian/Ubuntu
 - name: Install Maven via package on Debian/Ubuntu
   become: yes
-  apt:
+  ansible.builtin.apt:
     name: maven
     state: latest
     update_cache: yes
   when: ansible_facts.pkg_mgr == 'apt'
 
-- name: Install wget & tar prerequisites on RHEL/Amazon
-  become: yes
-  yum:
-    name:
-      - wget
-      - tar
-    state: latest
+# 3B. Download and install latest 3.9.x on RHEL/CentOS/Amazon
+- name: Fetch Maven 3.x directory listing
+  ansible.builtin.uri:
+    url: https://dlcdn.apache.org/maven/maven-3/
+    return_content: yes
+  register: maven_dir
+  when: ansible_facts.pkg_mgr in ['yum','dnf']
+
+- name: Extract all 3.9.x directories
+  ansible.builtin.set_fact:
+    maven_versions: >-
+      {{
+        maven_dir.content
+        | regex_findall('href="(3\\.9\\.\\d+)/"')
+        | unique
+        | sort
+      }}
+  when: ansible_facts.pkg_mgr in ['yum','dnf']
+
+- name: Pick latest 3.9.x or fall back to var.maven_version
+  ansible.builtin.set_fact:
+    maven_version_latest: >-
+      {{
+        (maven_versions[-1] if (maven_versions | length) > 0
+         else maven_version)
+      }}
+  when: ansible_facts.pkg_mgr in ['yum','dnf']
+
+- name: Debug chosen Maven version
+  ansible.builtin.debug:
+    msg: "Using Maven {{ maven_version_latest }}"
   when: ansible_facts.pkg_mgr in ['yum','dnf']
 
 - name: Download & unpack Maven on RHEL/Amazon
   become: yes
-  unarchive:
-    src: "https://dlcdn.apache.org/maven/maven-3/{{ maven_version }}/binaries/apache-maven-{{ maven_version }}-bin.tar.gz"
+  ansible.builtin.unarchive:
+    src: "https://dlcdn.apache.org/maven/maven-3/{{ maven_version_latest }}/binaries/apache-maven-{{ maven_version_latest }}-bin.tar.gz"
     dest: /opt
     remote_src: yes
   when: ansible_facts.pkg_mgr in ['yum','dnf']
 
-- name: Symlink Maven directory on RHEL/Amazon
+- name: Create /opt/maven symlink on RHEL/Amazon
   become: yes
-  file:
-    src: "/opt/apache-maven-{{ maven_version }}"
-    dest: "/opt/maven"
+  ansible.builtin.file:
+    src: "/opt/apache-maven-{{ maven_version_latest }}"
+    dest: /opt/maven
     state: link
   when: ansible_facts.pkg_mgr in ['yum','dnf']
 
-# --------------------------
-#  Environment setup
-# --------------------------
-- name: Create binaries dir
-  file:
+# -------------------------------------------------------------------
+# 4. Environment setup for Java, Go, Maven
+# -------------------------------------------------------------------
+- name: Create binaries directory for {{ login_username }}
+  become: yes
+  ansible.builtin.file:
     path: "/home/{{ login_username }}/binaries"
+    state: directory
     owner: "{{ login_username }}"
     group: "{{ login_username }}"
     mode: '0755'
-    state: directory
 
-- name: Configure JAVA_HOME
+- name: Configure JAVA_HOME and update PATH
   become: yes
-  copy:
+  ansible.builtin.copy:
     dest: /etc/profile.d/jdk17.sh
     mode: '0755'
     content: |
@@ -112,12 +137,21 @@
       {% endif %}
       export PATH=$JAVA_HOME/bin:$PATH
 
-- name: Configure MAVEN_HOME
+- name: Configure GO environment
   become: yes
-  copy:
+  ansible.builtin.copy:
+    dest: /etc/profile.d/go.sh
+    mode: '0755'
+    content: |
+      export PATH=$PATH:{{ (ansible_facts.pkg_mgr in ['yum','dnf']) | ternary('/usr/local/go/bin', '/usr/lib/go/bin') }}
+
+- name: Configure MAVEN_HOME and update PATH
+  become: yes
+  ansible.builtin.copy:
     dest: /etc/profile.d/maven.sh
     mode: '0755'
     content: |
       export M2_HOME=/opt/maven
       export MAVEN_HOME=/opt/maven
       export PATH=$PATH:$M2_HOME/bin
+

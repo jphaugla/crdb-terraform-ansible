@@ -1,4 +1,6 @@
 ---
+# roles/crdb-node/tasks/format-disks.yml
+
 - name: Verify the disk exists
   become: yes
   command: lsblk -no NAME "{{ disk_device }}"
@@ -24,26 +26,45 @@
   failed_when: false
   changed_when: false
 
-- name: Format the disk if not already formatted or if filesystem differs
-  become: yes
-  filesystem:
-    fstype: xfs
-    dev: "{{ target_device }}"
-    force: true
-  when: fs_check.stdout is undefined or fs_check.stdout != "xfs"
-
-- name: Create mount point
-  become: yes
-  file:
-    path: "{{ crdb_file_location }}"
-    state: directory
-
 - name: Check if the disk is mounted
   become: yes
   shell: mount | grep -w "{{ target_device }}"
   register: mount_check
   failed_when: false
   changed_when: false
+
+- name: Partition the disk if not already partitioned
+  become: yes
+  shell: |
+    echo -e "n\np\n1\n\n\nw" | fdisk "{{ disk_device }}"
+  when:
+    - target_device.endswith('1')      # only partition raw devices
+    - mount_check.stdout == ""         # not mounted
+    - fs_check.stdout is undefined     # no filesystem yet
+
+- name: Reload partition table
+  become: yes
+  command: partprobe "{{ disk_device }}"
+  when:
+    - target_device.endswith('1')
+    - mount_check.stdout == ""
+    - fs_check.stdout is undefined
+
+- name: Format the disk if not already formatted or if filesystem differs
+  become: yes
+  filesystem:
+    fstype: xfs
+    dev: "{{ target_device }}"
+    force: true
+  when:
+    - fs_check.stdout is undefined or fs_check.stdout != "xfs"
+    - mount_check.stdout == ""
+
+- name: Create mount point
+  become: yes
+  file:
+    path: "{{ crdb_file_location }}"
+    state: directory
 
 - name: Mount the disk if not already mounted
   become: yes

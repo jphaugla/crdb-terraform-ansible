@@ -1,6 +1,6 @@
 save_ips: true
 #  WARN-this version changes really fast and aborts when specified not found
-maven_version: '3.9.10'
+maven_version: '3.9.11'
 #  this works fine but the maven version keeps changing so setting to true
 install_java_maven_go: true
 #  default set to false as it starts postgresql

@@ -1,0 +1,21 @@
+[kafka_node_ips]
+34.172.156.215
+[crdb_node_ips]
+34.29.191.155 ansible_user=ubuntu
+34.58.243.20 ansible_user=ubuntu
+35.192.57.104 ansible_user=ubuntu
+[crdb_node_ips_0]
+34.29.191.155
+[haproxy_node_ips]
+34.9.252.248
+[app_node_ips]
+34.63.82.109
+[all_public_node_ips]
+34.9.252.248
+34.29.191.155
+34.58.243.20
+35.192.57.104
+34.63.82.109
+[all:vars]
+ansible_connection=ssh
+ansible_user=ubuntu

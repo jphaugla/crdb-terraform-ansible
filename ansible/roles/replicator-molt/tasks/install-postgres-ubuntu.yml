@@ -1,0 +1,61 @@
+- name: Install PostgreSQL package
+  become: yes
+  ansible.builtin.apt:
+    name: postgresql
+    state: present
+    update_cache: yes
+
+- name: Find installed PostgreSQL cluster version
+  become: yes
+  ansible.builtin.command:
+    cmd: ls /etc/postgresql
+  register: pg_versions
+  changed_when: false
+
+- name: Set pg_version fact
+  become: yes
+  ansible.builtin.set_fact:
+    pg_version: "{{ pg_versions.stdout_lines[0] }}"
+
+- name: Initialize PostgreSQL cluster
+  become: yes
+  ansible.builtin.command:
+    cmd: pg_createcluster {{ pg_version }} main --start
+  args:
+    creates: "/etc/postgresql/{{ pg_version }}/main/postgresql.conf"
+
+- name: Copy pg_hba.conf
+  become: yes
+  ansible.builtin.copy:
+    src: pg_hba.conf
+    dest: "/etc/postgresql/{{ pg_version }}/main/pg_hba.conf"
+    owner: postgres
+    group: postgres
+    mode: '0600'
+
+- name: Start & enable PostgreSQL
+  become: yes
+  ansible.builtin.systemd:
+    name: postgresql
+    state: started
+    enabled: yes
+
+- name: Install python3‑psycopg2
+  become: yes
+  ansible.builtin.apt:
+    name: python3-psycopg2
+    state: present
+    update_cache: yes
+
+- name: Configure PostgreSQL replication settings (Debian/Ubuntu)
+  become: yes
+  ansible.builtin.blockinfile:
+    path: "/etc/postgresql/{{ pg_version }}/main/postgresql.conf"
+    marker: "# {mark} ANSIBLE MANAGED POSTGRES REPLICATION CONFIG"
+    block: |
+      # Replication settings
+      wal_level = logical
+      max_wal_senders = 3
+      max_replication_slots = 3
+      wal_keep_size = 1024
+      hot_standby = on

@@ -1,11 +1,21 @@
-- name: Install the latest version haproxy
+# roles/haproxy-node/tasks/install-haproxy.yml
+---
+- name: Install haproxy package
   become: yes
-  package:
+  ansible.builtin.package:
     name: haproxy
-    state: latest
+    state: present
 
-- name: set up haproxy.cfg file
+- name: Ensure HAProxy runtime directory exists
   become: yes
-  template:
+  ansible.builtin.file:
+    path: /run/haproxy
+    state: directory
+    mode: '0755'
+
+- name: Set up haproxy.cfg file
+  become: yes
+  ansible.builtin.template:
     src: haproxy.j2
     dest: /etc/haproxy/haproxy.cfg
+    mode: '0644'

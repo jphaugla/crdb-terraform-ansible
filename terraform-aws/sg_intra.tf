@@ -8,7 +8,7 @@ module "security_group_intra" {
   tags        = local.tags
 
   # Allow any host in the VPC (including NLB nodes) to talk to our CRDB on
-  # 26257 (SQL) and 8080 (HTTP health UI).
+  # 26257 (SQL) and 8080 (HTTP health UI) and KAFKA.
   ingress_cidr_blocks = [ var.vpc_cidr ]
 
   ingress_with_cidr_blocks = [
@@ -23,6 +23,12 @@ module "security_group_intra" {
       to_port     = 8080
       protocol    = "tcp"
       description = "Allow HTTP (8080) from within VPC"
+    },
+    {
+      from_port   = 9092
+      to_port     = 9092
+      protocol    = "tcp"
+      description = "Allow HTTP (9021) from within VPC"
     },
   ]
 

@@ -9,7 +9,7 @@ module "azure" {
 # Globals
 # ----------------------------------------
    owner                      = "jhaug"
-   resource_name              = "east" # This is NOT the resource group name, but is used to form the resource group name unless it is passed in as multi-region-resource-group-name
+   resource_name              = "central" # This is NOT the resource group name, but is used to form the resource group name unless it is passed in as multi-region-resource-group-name
    multi_region               = false
    
 # ----------------------------------------
@@ -22,24 +22,23 @@ module "azure" {
 # ----------------------------------------
   allow_non_tls              = true
 
-# Azure Locations: "australiacentral,australiacentral2,australiaeast,australiasoutheast,brazilsouth,brazilsoutheast,brazilus,canadacentral,canadaeast,centralindia,centralus,centraluseuap,eastasia,eastus,eastus2,eastus2euap,francecentral,francesouth,germanynorth,germanywestcentral,israelcentral,italynorth,japaneast,japanwest,jioindiacentral,jioindiawest,koreacentral,koreasouth,malaysiasouth,northcentralus,northeurope,norwayeast,norwaywest,polandcentral,qatarcentral,southafricanorth,southafricawest,southcentralus,southeastasia,southindia,swedencentral,swedensouth,switzerlandnorth,switzerlandwest,uaecentral,uaenorth,uksouth,ukwest,westcentralus,westeurope,westindia,westus,westus2,westus3,austriaeast,chilecentral,eastusslv,israelnorthwest,malaysiawest,mexicocentral,newzealandnorth,southeastasiafoundational,spaincentral,taiwannorth,taiwannorthwest"
 # ----------------------------------------
 # Resource Group
 # ----------------------------------------
-   resource_group_location    = "eastus2"
+   resource_group_location    = "centralus"
    
 # ----------------------------------------
 # Existing Key Info
 # ----------------------------------------
-   ssh_key_name           = "jhaugland-eastus2"
-   ssh_key_resource_group = "jhaugland-rg"
-   ssh_private_key              = "~/.ssh/jhaugland-eastus2.pem"
+   ssh_key_name           = "jhaugland-centralus"
+   ssh_key_resource_group = "jhaugland-key-central-us"
+   ssh_private_key              = "~/.ssh/jhaugland-centralus.pem"
    
 # ----------------------------------------
 # Network
 # ----------------------------------------
    virtual_network_cidr       = "192.168.3.0/24"
-   virtual_network_location   = "eastus2"
+   virtual_network_location   = "centralus"
 
 #  file location for larger files not to be placed in the user home directory
 #  will be created as root but owned by the adminuser on app-node and crdb-nodes 
@@ -50,10 +49,7 @@ module "azure" {
 # ----------------------------------------
 # CRDB Instance Specifications
 # ----------------------------------------
-#   this is very small node just for testing deployment
-   crdb_vm_size               = "Standard_B4ms"
-#   this is a medium size  production node 
-#   crdb_vm_size               = "Standard_D8s_v5"
+   crdb_vm_size               = "Standard_D4s_v5"
    crdb_disk_size             = 128
    crdb_nodes                 = 3
    
@@ -67,7 +63,7 @@ module "azure" {
 # ----------------------------------------
 # CRDB Specifications
 # ----------------------------------------
-   crdb_version               = "24.3.4"
+   crdb_version               = "25.2.2"
    
 # ----------------------------------------
 # Cluster Enterprise License Keys
@@ -82,9 +78,7 @@ module "azure" {
 # ----------------------------------------
 # HA Proxy Instance Specifications
 # ----------------------------------------
-#  very small size just to verify functionality
-   haproxy_vm_size            = "Standard_B4ms"
-#   haproxy_vm_size            = "Standard_D4s_v5"
+   haproxy_vm_size            = "Standard_D4s_v5"
 # ----------------------------------------
 # Create Network load balancer
 # ----------------------------------------
@@ -96,19 +90,16 @@ module "azure" {
    include_app                = "yes"
 #  this will install postgres with employee database and start replicator
    start_replicator           = "no"
+   setup_migration           = "yes"
    app_nodes                  = 1
-#   this is bare minimum for functionalizy
-   app_vm_size                = "Standard_B4ms"
-#   app_vm_size                = "Standard_D8s_v5"
+   app_vm_size                = "Standard_D4s_v5"
    app_disk_size              = 64
    
 # ----------------------------------------
 # Kafka Instance Specifications
 # ----------------------------------------
-   include_kafka           = "no"
-#   small size version
-   kafka_vm_size            = "Standard_B4ms"
-#    kafka_vm_size             = "Standard_D4s_v5"
+   include_kafka           = "yes"
+   kafka_vm_size             = "Standard_D4s_v5"
    
 # ----------------------------------------
 # Cluster Location Data - For console map
@@ -121,10 +112,12 @@ module "azure" {
    ansible_verbosity_switch = ""
    
 # ----------------------------------------
-# Image parameters for Kafka
+# Image parameters for Kafka and app node
 # ----------------------------------------
    test-publisher = "Canonical"
    test-offer     = "0001-com-ubuntu-server-jammy"
    test-sku       = "22_04-lts-gen2"
    test-version   = "latest"
+   run_ansible    = true
+   
 }

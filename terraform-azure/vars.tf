@@ -217,6 +217,21 @@
         error_message = "Valid value for variable 'run_init' is : 'yes' or 'no'"        
       }
     }
+    variable "run_ansible" {
+      type        = bool
+      description = "Whether to run the Ansible playbooks in each region"
+      default     = true
+    }
+    variable "setup_migration" {
+      description = "'yes' or 'no' to setup the migration with replicator molt"
+      type        = string
+      default     = "yes"
+      validation {
+        condition = contains(["yes", "no"], var.setup_migration)
+        error_message = "Valid value for variable 'setup_migration' is : 'yes' or 'no'"
+      }
+    }
+
 
 # ----------------------------------------
 # Cluster Enterprise License Keys

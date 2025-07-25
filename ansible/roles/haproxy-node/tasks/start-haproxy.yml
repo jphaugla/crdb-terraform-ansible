@@ -1,3 +1,5 @@
+# roles/haproxy-node/tasks/start-haproxy.yml
+---
 - name: Change selinux setting to allow haproxy to connect to any port
   become: yes
   ansible.builtin.command: setsebool -P haproxy_connect_any=1
@@ -5,17 +7,15 @@
     - ansible_selinux is defined
     - ansible_selinux.status == "enabled"
 
-- name: Ensure haproxy is enabled and running
+- name: Reload systemd & restart haproxy
   become: yes
-  ansible.builtin.service:
-    name: haproxy
-    enabled: yes
-    state: started
+  block:
+    - name: Reload systemd daemon
+      ansible.builtin.systemd:
+        daemon_reload: yes
 
-# handlers/main.yml
-# -----------------
-- name: Reload haproxy
-  become: yes
-  ansible.builtin.service:
-    name: haproxy
-    state: reloaded
+    - name: Restart and enable haproxy service
+      ansible.builtin.service:
+        name: haproxy
+        state: restarted
+        enabled: yes

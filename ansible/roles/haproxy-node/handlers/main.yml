@@ -1,0 +1,13 @@
+# roles/haproxy-node/handlers/main.yml
+---
+- name: Reload haproxy
+  become: yes
+  block:
+    - name: Reload systemd daemon
+      ansible.builtin.systemd:
+        daemon_reload: yes
+
+    - name: Reload haproxy service
+      ansible.builtin.service:
+        name: haproxy
+        state: reloaded
