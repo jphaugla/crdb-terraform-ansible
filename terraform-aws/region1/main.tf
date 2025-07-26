@@ -55,4 +55,5 @@ module "my_aws" {
 # ----------------------------------------
    include_load_balancer           = "yes"
    run_ansible                     = true
+   do_crdb_init                    = true
 }

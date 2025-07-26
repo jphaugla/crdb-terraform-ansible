@@ -1,3 +1,6 @@
+- meta: end_play
+  when: not do_crdb_init|bool
+
 - name: init crdb
   include_tasks: crdb_init.yml
 

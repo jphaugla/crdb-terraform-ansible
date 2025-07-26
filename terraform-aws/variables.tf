@@ -433,6 +433,12 @@
       default     = true
     }
 
+    variable "do_crdb_init" {
+      type        = bool
+      description = "run the crdb_init.  this is mainly for multi-region to only run in one region"
+      default     = true
+    }
+
     variable "environment" {
       description = "Deployment environment (e.g. dev, staging, prod)"
       type        = string

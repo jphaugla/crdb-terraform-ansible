@@ -11,14 +11,14 @@
   gather_facts: True
   roles:
     - common
-- hosts: haproxy_node_ips
-  gather_facts: True
-  roles:
-    - haproxy-node
 - hosts: crdb_node_ips
   gather_facts: True
   roles:
     - crdb-node
+- hosts: haproxy_node_ips
+  gather_facts: True
+  roles:
+    - haproxy-node
 - hosts: crdb_node_ips_0
   gather_facts: True
   roles:

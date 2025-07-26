@@ -1,3 +1,4 @@
+# multiregeionAWS/region.tf
 module "crdb-region-0" {
   source    = "../terraform-aws"
   providers = { aws = aws.region-0 }
@@ -57,6 +58,12 @@ module "crdb-region-0" {
 
   # ─── Load Balancer ───
   include_load_balancer     = var.include_load_balancer
+  do_crdb_init              = true
+  tls_private_key = tls_private_key.crdb_ca_keys.private_key_pem
+  tls_public_key  = tls_private_key.crdb_ca_keys.public_key_pem
+  tls_cert        = tls_self_signed_cert.crdb_ca_cert.cert_pem
+  tls_user_cert   = tls_locally_signed_cert.user_cert.cert_pem
+  tls_user_key    = tls_private_key.client_keys.private_key_pem
 }
 
 module "crdb-region-1" {
@@ -111,6 +118,12 @@ module "crdb-region-1" {
   full_path_license_directory = var.full_path_license_directory
 
   include_load_balancer     = var.include_load_balancer
+  do_crdb_init              = false
+  tls_private_key = tls_private_key.crdb_ca_keys.private_key_pem
+  tls_public_key  = tls_private_key.crdb_ca_keys.public_key_pem
+  tls_cert        = tls_self_signed_cert.crdb_ca_cert.cert_pem
+  tls_user_cert   = tls_locally_signed_cert.user_cert.cert_pem
+  tls_user_key    = tls_private_key.client_keys.private_key_pem
 }
 
 module "crdb-region-2" {
@@ -164,5 +177,11 @@ module "crdb-region-2" {
   full_path_license_directory = var.full_path_license_directory
 
   include_load_balancer     = var.include_load_balancer
+  do_crdb_init              = false
+  tls_private_key = tls_private_key.crdb_ca_keys.private_key_pem
+  tls_public_key  = tls_private_key.crdb_ca_keys.public_key_pem
+  tls_cert        = tls_self_signed_cert.crdb_ca_cert.cert_pem
+  tls_user_cert   = tls_locally_signed_cert.user_cert.cert_pem
+  tls_user_key    = tls_private_key.client_keys.private_key_pem
 }
 
