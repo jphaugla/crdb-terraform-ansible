@@ -43,9 +43,10 @@ The goal is to have minimal changes to the ansible for each of the cloud provide
 * [ansible](ansible) contains the ansible scripts
 * [terraform-aws](terraform-aws) contains the aws terraform code
 * [multiregionAWS](multiregionAWS) contains aws multi-region terraform code.  Smaller terraform code using terraform-aws folder but for multi-region
+* [multiregionGCP](multiregionGCP) contains gcp multi-region terraform code.  Smaller terraform code using terraform-gcp folder but for multi-region
 * [terraform-azure](terraform-azure) contains the azure terraform code
 * [terraform-gcp](terraform-gcp) contains the gcp terraform code
-* mutiregionGCP and multireginAzure will come soon...
+* multireginAzure will come soon...
 
 
 Terraform HCL to create a multi-node CockroachDB cluster..   The number of nodes can be a multiple of 3 and nodes will be evenly distributed between 3 Azure Zones.   Optionally, you can include
@@ -80,6 +81,7 @@ add the enterprise license and the cluster organization to the following files i
   * [Azure single region](terraform-azure/region1) 
   * [AWS single region](terraform-aws/region1)
   * [AWS multi-region](multiregionAWS/test)
+  * [GCP multi-region](multiregionGCP/test)
   * [GCP single region](terraform-gcp/region1)
 * Valid the parameters in the main.tf in each of the chosen directory
 * Can enable/disable deployment of haproxy by setting the *include_ha_proxy* flag to "no" in [deploy main.tf](terraform-azure/region1/main.tf)
