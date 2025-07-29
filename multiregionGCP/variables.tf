@@ -9,20 +9,15 @@
 # 1. MULTI-REGION DRIVER PARAMETERS
 # ─────────────────────────────────────────────────────────────────────────────
 
-variable "aws_region_list" {
-  description = "List of three AWS regions to deploy CockroachDB (e.g. [\"us-east-1\",\"us-west-2\",\"us-east-2\"])."
+variable "gcp_region_list" {
+  description = "List of three GCP regions to deploy CockroachDB"  
   type        = list(string)
-  default     = ["us-east-1", "us-west-2", "us-east-2"]
+  default     =  ["us-central1", "us-west1", "us-east1"]
 }
 
-variable "aws_instance_keys" {
-  description = "List of three EC2 Key Pair names—one per region, in the same order as aws_region_list."
-  type        = list(string)
-}
-
-variable "ssh_private_key_list" {
-  description = "List of three local paths to the private key files—one per region, matching aws_instance_keys."
-  type        = list(string)
+variable "ssh_private_key" {
+  description = "ssh key which is multi-region in gcp and doesn't need a key name"
+  type        = string
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -104,39 +99,16 @@ variable "crdb_instance_type" {
   description = "EC2 instance type for CockroachDB nodes."
   type        = string
   default     = "m6i.large"
-
-  validation {
-    condition = contains([
-      "t2.micro","t3a.small","t3.small","t3a.micro","t3a.medium","t3.medium","t3a.large",
-      "c5a.large","t3.large","t4g.xlarge","t4g.large","c5.large","c6i.large","c5ad.large","m5a.large","m6a.large",
-      "t2.large","c5d.large","m5.large","m6i.large","c4.large","m4.large","m5ad.large",
-      "c5n.large","m5d.large","r5a.large","m5n.large","r5.large","r6i.large","c1.medium",
-      "r5ad.large","m3.large","r4.large","m5dn.large","r5d.large","r5b.large","r5n.large",
-      "t3a.xlarge","c5a.xlarge","i3.large","m5zn.large","r3.large","t3.xlarge","r5dn.large",
-      "c5.xlarge","c6i.xlarge","c5ad.xlarge","c5d.2xlarge","c5d.4xlarge","c5d.9xlarge",
-      "m5.xlarge","m5.2xlarge","m5.4xlarge","m5.8xlarge","m5a.xlarge","m5a.2xlarge",
-      "m5a.4xlarge","m5a.8xlarge","m6a.xlarge","m6a.2xlarge","m6a.4xlarge","m6a.8xlarge",
-      "m6i.xlarge","m6i.2xlarge","m6i.4xlarge","m6i.8xlarge"
-    ], var.crdb_instance_type)
-    error_message = "Invalid 'crdb_instance_type'; see allowed list in variables.tf."
-  }
 }
 
 variable "crdb_store_volume_type" {
   description = "EBS volume type for CockroachDB data (gp2 or gp3)."
   type        = string
-  default     = "gp3"
-
-  validation {
-    condition     = contains(["gp2", "gp3"], var.crdb_store_volume_type)
-    error_message = "'crdb_store_volume_type' must be 'gp2' or 'gp3'."
-  }
 }
 
 variable "crdb_store_volume_size" {
   description = "EBS volume size (GiB) for CockroachDB data."
   type        = number
-  default     = 8
 }
 
 variable "crdb_version" {
@@ -146,7 +118,7 @@ variable "crdb_version" {
 
   validation {
     condition = contains([
-      "25.2.1","25.2.2",
+      "25.2.1","25.2.2","25.2.3","25.2.4",
       "25.2.0","25.1.6","25.1.5","25.1.4","25.1.3","25.1.2","25.1.1",
       "24.2.8","24.2.6","24.2.5","24.2.4","24.2.3","24.2.2","24.2.1",
       "23.2.19","23.2.18","23.2.17","23.2.1","23.1.14","23.1.13"
@@ -371,4 +343,9 @@ variable "run_ansible" {
   description = "run ansible code in each region.  Turn off when just making a terrform only change"
   type        = bool
   default     = true
+}
+
+variable "gcp_credentials_file" {
+  description = "Path to your Google Cloud ADC JSON file"
+  type        = string
 }

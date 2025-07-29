@@ -1,5 +1,4 @@
 // terraform-gcp/inventory.tf
-
 resource "local_file" "instances_file" {
   filename = var.instances_inventory_file
 

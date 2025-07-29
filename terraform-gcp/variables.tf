@@ -203,11 +203,6 @@ variable "crdb_root_volume_size" {
   default     = 8
 }
 
-variable "crdb_instance_key_name" {
-  description = "Name of the SSH key to attach to CRDB instances"
-  type        = string
-}
-
 variable "run_init" {
   description = "Include HAProxy (yes/no)"
   type        = string
@@ -384,3 +379,19 @@ variable "gcp_credentials_file" {
   type        = string
 }
 
+variable "do_crdb_init" {
+  type        = bool
+  description = "run the crdb_init.  this is mainly for multi-region to only run in one region"
+  default     = true
+}
+
+variable "do_network_create" {
+  type        = bool
+  description = "create the network if true, otherwise import the network in multi-region"
+  default     = true
+}
+variable "gcp_region_list" {
+  description = "List of three GCP regions to deploy CockroachDB only needed when multi-region"
+  type        = list(string)
+  default     =  ["us-central1", "us-west1", "us-east1"]
+}

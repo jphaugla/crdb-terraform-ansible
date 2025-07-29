@@ -1,14 +1,40 @@
 // terraform-gcp/region1/main.tf
+terraform {
+  required_version = ">= 1.0"
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 4.0"
+    }
+  }
+
+}
+
+locals {
+  project_name       = "cockroach-jhaugland"
+  region             = "us-east1"
+  credentials_file   = "~/.config/gcloud/application_default_credentials.json"
+  ssh_private_key    = "~/.ssh/jph-cockroach-gcp"
+  my_ip_address      = "174.141.204.193"
+  vpc_cidr           = "192.168.3.0/24"
+  owner              = "jhaug"
+}
+
+provider "google" {
+  project     = local.project_name
+  region      = local.region
+  credentials = file(local.credentials_file)
+}
 
 module "my_gcp" {
   source                     = "../"
-  my_ip_address              = "174.141.204.193"
-  virtual_network_location   = "us-central1"
-  owner                      = "jhaug"
-  project_name               = "cockroach-jhaugland"
-  crdb_instance_key_name     = "jph-cockroach-us-central1"
-  ssh_private_key            = "~/.ssh/jph-cockroach-us-central1"
-  vpc_cidr                   = "192.168.6.0/24"
+  my_ip_address              = local.my_ip_address
+  virtual_network_location   = local.region
+  owner                      = local.owner
+  project_name               = local.project_name
+  ssh_private_key            = local.ssh_private_key
+  gcp_credentials_file       = local.credentials_file
+  vpc_cidr                   = local.vpc_cidr
 
   # -----------------------------------------
   # CRDB Specifications
@@ -69,6 +95,5 @@ module "my_gcp" {
   include_load_balancer        = "no"
   full_path_license_directory = "/Users/jasonhaugland/.crdb/"
   run_ansible                  = true
-  gcp_credentials_file = "/Users/jasonhaugland/.config/gcloud/application_default_credentials.json"
 }
 

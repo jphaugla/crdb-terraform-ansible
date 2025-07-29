@@ -7,15 +7,10 @@ terraform {
       version = ">= 4.0"
     }
   }
-  backend "gcs" {
-    bucket = var.state_bucket
-    prefix = "terraform/state"
-  }
 }
-
+# single, un‑aliased provider for standalone use
 provider "google" {
-   project = var.project_name
-   region  = var.virtual_network_location
-   credentials = file(var.gcp_credentials_file)
+  project     = var.project_name
+  region      = var.virtual_network_location
+  credentials = file(var.gcp_credentials_file)
 }
-

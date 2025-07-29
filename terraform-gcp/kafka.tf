@@ -1,17 +1,14 @@
-// terraform-gcp/kafka.tf
-data "google_compute_image" "kafka_image" {
-  family  = "ubuntu-2204-lts"
-  project = "ubuntu-os-cloud"
-}
+# terraform-gcp/kafka.tf
+
 resource "google_compute_instance" "kafka" {
   count        = var.include_kafka == "yes" ? 1 : 0
-  name         = "kafka-0"
+  name         = "kafka-${count.index}-${var.virtual_network_location}"
   machine_type = var.kafka_instance_type
-  zone         = "${var.virtual_network_location}-a"
+  zone         = local.first_zone
 
   boot_disk {
     initialize_params {
-      image = data.google_compute_image.kafka_image.self_link
+      image = data.google_compute_image.compute_image.self_link
       size  = 50
       type  = "pd-standard"
     }
@@ -22,10 +19,10 @@ resource "google_compute_instance" "kafka" {
     subnetwork = google_compute_subnetwork.main_subnet.name
     access_config {}
   }
-  labels = merge(
-    local.labels,
-    { name = "${var.owner}-haproxy-${count.index}" }
-  )
 
+  labels = merge(
+    local.base_labels,
+    { name = "${var.owner}-kafka-${var.virtual_network_location}" }
+  )
 }
 

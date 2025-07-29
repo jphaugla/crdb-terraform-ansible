@@ -68,6 +68,7 @@ ansible-playbook \
   -e login_username="${local.admin_username}" \
   -e kafka_username=ubuntu \
   -e include_app="${var.include_app}" \
+  -e do_crdb_init="${var.do_crdb_init}" \
   -e install_enterprise_keys="${var.install_enterprise_keys}" \
   -e load_balancer_public_ip="${local.front_end_public_ip}" \
   -e load_balancer_private_ip="${local.front_end_private_ip}"

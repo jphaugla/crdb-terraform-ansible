@@ -1,18 +1,18 @@
-// terraform-gcp/app.tf
+# terraform-gcp/app.tf
 
 resource "google_compute_instance" "app" {
-  count        = (var.include_app == "yes" && var.create_ec2_instances == "yes") ? 1 : 0
-  name         = "app-${count.index}"
+  count        = var.include_app == "yes" ? 1 : 0
+  name         = "app-${count.index}-${var.virtual_network_location}"
   machine_type = var.app_instance_type
-  zone         = "${var.virtual_network_location}-a"
+  zone         = local.first_zone
 
   boot_disk {
     initialize_params {
-      image = data.google_compute_image.app_image.self_link
+      image = data.google_compute_image.compute_image.self_link
       size  = 100
       type  = "pd-standard"
     }
-    # GCP always encrypts boot disks
+    # GCP always encrypts boot disks by default
   }
 
   network_interface {
@@ -20,15 +20,10 @@ resource "google_compute_instance" "app" {
     subnetwork = google_compute_subnetwork.main_subnet.name
     access_config {}
   }
-  labels = merge(
-    local.labels,
-    { name = "${var.owner}-haproxy-${count.index}" }
-  )
-}
 
-// Data source for app image
-data "google_compute_image" "app_image" {
-  family  = "ubuntu-2204-lts"
-  project = "ubuntu-os-cloud"
+  labels = merge(
+    local.base_labels,
+    { name = "${var.owner}-app-${var.virtual_network_location}" }
+  )
 }
 
