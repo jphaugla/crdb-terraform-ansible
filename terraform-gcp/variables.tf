@@ -104,6 +104,14 @@ variable "my_ip_address" {
   type        = string
   default     = "0.0.0.0"
 }
+# ----------------------------------------
+# The following was created to account for NetSkope Tunneling
+# ----------------------------------------
+variable netskope_ips {
+  description = "A list of IP CIDR ranges to allow as clients.  The IPs listed below are Netskope IP Ranges"
+  default     = ["8.36.116.0/24" ,"8.39.144.0/24", "31.186.239.0/24", "163.116.128.0/17", "162.10.0.0/17"]
+  type        = list(string)
+}
 
 variable "ssh_private_key" {
   description = "Path to SSH private key"

@@ -15,7 +15,7 @@ locals {
   region             = "us-east1"
   credentials_file   = "~/.config/gcloud/application_default_credentials.json"
   ssh_private_key    = "~/.ssh/jph-cockroach-gcp"
-  my_ip_address      = "174.141.204.193"
+  my_ip_address      = "162.222.52.25"
   vpc_cidr           = "192.168.3.0/24"
   owner              = "jhaug"
 }
@@ -43,7 +43,7 @@ module "my_gcp" {
   crdb_instance_type         = "e2-standard-4"
   crdb_store_volume_type     = "pd-standard"
   crdb_store_volume_size     = 200
-  crdb_version               = "25.2.2"
+  crdb_version               = "25.2.4"
   crdb_arm_release           = "yes"
   crdb_enable_spot_instances = "no"
   crdb_file_location         = "/mnt/data"

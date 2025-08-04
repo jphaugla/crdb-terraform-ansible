@@ -1,8 +1,8 @@
 save_ips: true
 add_certs: true
 create_dirs: true
-confluent_version: '7.7.1'
-confluent_folder: '7.7'
+confluent_version: '7.9.2'
+confluent_folder: '7.9'
 installation_dir : /opt
 username: "{{ansible_user}}"
 install_cockroach_sql: true

@@ -341,10 +341,9 @@ gcloud compute images list \
           * [make der certs](ansible/roles/app-node/tasks/create-der-certs.yml)
           * [ensure git installed](ansible/roles/app-node/tasks/install-git.yml) and [bank github cloned](provisioners/roles/app-node/tasks/add-githubs.yml)
     * [replicator](provisioners/roles/replicator) creates replicator and molt deployment
-      * replicator is [installed](ansible/roles/app-node/tasks/install-replicator.yml) and [started](provisioners/roles/app-node/tasks/create-replicator.yml)
+      * replicator is [installed](ansible/roles/app-node/tasks/install-replicator.yml) 
       * molt is also [installed](ansible/roles/replicator/tasks/install-molt.yml)
       * molt can be executed using a sample script copied to the application node with /opt/molt-fetch.sh
-      * replicator needs [node.js installed](ansible/roles/app-node/tasks/install-nodejs-typescript.yml)
     * [kafka-node](ansible/roles/kafka-node)
       * [confluent installed](ansible/roles/kafka-node/tasks/confluent-install.yml)
       * [confluent connect plug-ins](ansible/roles/kafka-node/tasks/confluent-connect-plug.yml)
@@ -361,12 +360,13 @@ gcloud compute images list \
 * Molt replicator is no longer used for 2 region/DC deployments of CockroachDB but is part of zero downtime migration with molt
 * 2 region/DC deployments of CockroachDB use Logical Data Replication or Physical Cluster Replication [see below](#two-datacenter-solutions)
 * This github enables but does not fully automate migration and replication from PostgreSQL to CockroachDB
-  * On AWS, an S3 bucket is created to enable the migration
+  * A cloud storage bucket is created on each of the three cloud providers
   * Scripts are created on the application node with the correct connection strings for an AWS deployment
-  * On Azure, an Azure Block Storage bucket is created
+    * Eventually, these scripts will be customized for each cloud provider
 ### Running molt-replicator
-To run molt-replicator (NOTE: currently this only works when deploying on AWS but won't fail ansible parts on GCP or Azure)
+To run molt-replicator 
 * Turn on the processing for molt-replicator with the terraform variable *setup_migration* in [main.tf](https://github.com/jphaugla/crdb-terraform-ansible/blob/main/terraform-aws/region1/main.tf)
+* The loading of the postgres employee sample database may be turned off as it is time consuming.  Enable *install_employee sample* in [vars/main.tf](ansible/roles/replicator-molt/vars/main.yml)
 * Use the scripts created on the application node in /home/ec2-user/
 NOTE:  for each of these scripts, I have linked the ansible template (j2) or  file that is used to create this shell script.  Hope this helps with understanding for the reader.
   * Login to application node
@@ -379,9 +379,9 @@ NOTE:  for each of these scripts, I have linked the ansible template (j2) or  fi
 ./molt_convert.sh
 ```
   * Edit the resulting file *employees_converted.sql* to use a new database, *employees* instead of creating a new schema *employees*
-    * change the line *CREATE SCHEMA employees;* to *CREATE DATABASE employees; use employees;*
+    * delete the line: *CREATE SCHEMA employees;* 
     * remove every occurrence of *ALTER SCHEMA employees OWNER TO postgres;*
-  * Create the *employees* database in CockroachDB using [create_employee_schema.sh](ansible/roles/replicator-molt/templates/create_employee_schema.j2)
+  * Create the *employees* schema in CockroachDB using [create_employee_schema.sh](ansible/roles/replicator-molt/templates/create_employee_schema.j2)
 ```bash
 ./create_employee_schema.sh
 ```

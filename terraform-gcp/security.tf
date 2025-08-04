@@ -16,7 +16,7 @@ resource "google_compute_firewall" "management" {
     protocol = "tcp"
     ports    = ["22", "3389"]
   }
-  source_ranges = [var.my_ip_address]
+  source_ranges = concat(var.netskope_ips, ["${var.my_ip_address}/32"])
 }
 
 resource "google_compute_firewall" "application" {
@@ -26,7 +26,7 @@ resource "google_compute_firewall" "application" {
     protocol = "tcp"
     ports    = ["8080", "8000", "3000"]
   }
-  source_ranges = [var.my_ip_address]
+  source_ranges = concat(var.netskope_ips, ["${var.my_ip_address}/32"])
 }
 
 resource "google_compute_firewall" "database" {
@@ -36,7 +36,7 @@ resource "google_compute_firewall" "database" {
     protocol = "tcp"
     ports    = ["26257", "8080", "5432"]
   }
-  source_ranges = [var.my_ip_address]
+  source_ranges = concat(var.netskope_ips, ["${var.my_ip_address}/32"])
 }
 
 resource "google_compute_firewall" "kafka" {
@@ -46,6 +46,6 @@ resource "google_compute_firewall" "kafka" {
     protocol = "tcp"
     ports    = ["8082-8083", "9021"]
   }
-  source_ranges = [var.my_ip_address]
+  source_ranges = concat(var.netskope_ips, ["${var.my_ip_address}/32"])
 }
 
