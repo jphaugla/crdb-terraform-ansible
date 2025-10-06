@@ -1,33 +1,74 @@
+# -----------------------------
+# Debian/Ubuntu
+# -----------------------------
 - name: Install system packages on Debian/Ubuntu
   become: yes
-  apt:
+  ansible.builtin.apt:
     name:
       - gcc
       - g++
       - libpq-dev
-      - python3-dev
       - postgresql-server-dev-all
-    state: latest
+      - python3.11
+      - python3.11-dev
+      - python3.11-venv
+    state: present
     update_cache: yes
   when: ansible_facts.pkg_mgr == 'apt'
 
-- name: Install system packages on RHEL/CentOS
+# -----------------------------
+# RHEL/CentOS/Amazon Linux 2023
+# -----------------------------
+- name: Install system packages on RHEL/CentOS/Amazon Linux
   become: yes
-  yum:
+  ansible.builtin.package:
     name:
       - gcc
       - gcc-c++
       - postgresql-devel
-      - python3-devel
       - libpq-devel
-    state: latest
+      - python3.11
+      - python3.11-devel
+    state: present
   when: ansible_facts.pkg_mgr in ['yum','dnf']
 
-- name: Install sqlalchemy and psycopg2
+# Ensure pip for Python 3.11 (portable across distros)
+- name: Ensure pip is available for Python 3.11
   become: yes
-  pip:
+  ansible.builtin.command: python3.11 -m ensurepip --upgrade
+  changed_when: false  # safe to re-run
+
+# Create venv and install deps
+- name: Create Python 3.11 virtualenv
+  become: yes
+  ansible.builtin.command: "python3.11 -m venv {{ py311_venv_path }}"
+  args:
+    creates: "{{ py311_venv_path }}/bin/activate"
+
+- name: Upgrade pip/setuptools/wheel in venv
+  become: yes
+  ansible.builtin.pip:
+    name: [pip, setuptools, wheel]
+    state: latest
+    virtualenv: "{{ py311_venv_path }}"
+    virtualenv_command: "python3.11 -m venv"
+
+- name: Install sqlalchemy and psycopg2 in venv
+  become: yes
+  ansible.builtin.pip:
     name:
-      - sqlalchemy~=1.4
+      - "sqlalchemy~=1.4"
       - sqlalchemy-cockroachdb
       - psycopg2
-    executable: pip3
+    virtualenv: "{{ py311_venv_path }}"
+    virtualenv_command: "python3.11 -m venv"
+
+- name: Ensure venv directory and contents are owned by login_username
+  become: yes
+  ansible.builtin.file:
+    path: "{{ py311_venv_path }}"
+    state: directory
+    owner: "{{ login_username }}"
+    group: "{{ login_username }}"
+    recurse: yes
+

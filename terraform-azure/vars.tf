@@ -480,17 +480,17 @@
 # NOTE that you can't change this without changing parts of the provisioning scripts.
 variable "test-publisher" {
   description = "The owner of the image"
-  default     = "RedHat"
+  default     = "Canonical"
 }
 
 variable "test-offer" {
   description = "The type of the image"
-  default     = "RHEL"
+  default     = "0001-com-ubuntu-server-jammy"
 }
 
 variable "test-sku" {
   description = "The SKU of the image"
-  default     = "8-lvm-gen2"
+  default     = "22_04-lts-gen2"
 }
 
 variable "test-version" {

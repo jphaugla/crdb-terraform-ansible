@@ -7,14 +7,11 @@
 - name: Install package fact dependencies
   become: true
   ansible.builtin.package:
-    name: "{{ _pkg_fact_req }}"
+    name: >-
+      {{ 'python-apt' if ansible_python_version is version('3','<')
+         else 'python3-apt' }}
     state: present
-  when: (_pkg_fact_req)
-  vars:
-    _pkg_fact_req: "{% if (ansible_pkg_mgr == 'apt') %}\
-                    {{ ('python-apt' if ansible_python_version is version('3', '<') else 'python3-apt') }}
-                    {% else %}\
-                    {% endif %}"
+  when: ansible_pkg_mgr == 'apt'
 
 - name: Gather package facts
   ansible.builtin.package_facts:

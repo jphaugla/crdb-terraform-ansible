@@ -14,7 +14,7 @@ resource "aws_instance" "crdb" {
     device_index = 0
   }
   key_name      = var.crdb_instance_key_name
-  iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
+  iam_instance_profile  = var.enable_s3_iam ? aws_iam_instance_profile.ec2_instance_profile[0].name : null
   root_block_device {
     delete_on_termination = true
     encrypted = true

@@ -52,6 +52,7 @@ module "crdb-region-0" {
   setup_migration           = var.setup_migration
   dbadmin_user_name         = var.dbadmin_user_name
   dbadmin_user_password     = var.dbadmin_user_password
+  enable_s3_iam             = var.enable_s3_iam
 
   # ─── Licensing ───
   full_path_license_directory = var.full_path_license_directory
@@ -114,6 +115,7 @@ module "crdb-region-1" {
   setup_migration           = var.setup_migration
   dbadmin_user_name         = var.dbadmin_user_name
   dbadmin_user_password     = var.dbadmin_user_password
+  enable_s3_iam             = var.enable_s3_iam
 
   full_path_license_directory = var.full_path_license_directory
 
@@ -173,6 +175,7 @@ module "crdb-region-2" {
   setup_migration           = var.setup_migration
   dbadmin_user_name         = var.dbadmin_user_name
   dbadmin_user_password     = var.dbadmin_user_password
+  enable_s3_iam             = var.enable_s3_iam
 
   full_path_license_directory = var.full_path_license_directory
 

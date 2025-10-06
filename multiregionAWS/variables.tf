@@ -366,9 +366,14 @@ variable "tls_user_key" {
   default     = ""
 }
 
-
 variable "run_ansible" {
   description = "run ansible code in each region.  Turn off when just making a terrform only change"
   type        = bool
   default     = true
+}
+
+variable "enable_s3_iam" {
+  description = "enable s3 iam policy sections"
+  type        = bool
+  default     = false
 }

@@ -1,8 +1,3 @@
-locals {
-  app_zones = ["1", "2", "3"]
-  prometheus_app_string = (var.prometheus_app_string != "" ? var.prometheus_app_string : join(",", formatlist("%s:30005", azurerm_network_interface.app[*].private_ip_address)))
-}
-
 resource "azurerm_public_ip" "app-ip" {
     count                        = var.app_nodes
     name                         = "${var.owner}-${var.resource_name}-public-ip-app-${count.index}"

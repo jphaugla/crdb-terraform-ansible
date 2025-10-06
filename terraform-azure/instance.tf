@@ -1,14 +1,3 @@
-# TODO:  CRDB instances greater than 3
-locals {
-  zones = ["1", "2", "3"]
-}
-
-locals {
-  ip_list     = join(" ", azurerm_network_interface.crdb_network_interface[*].private_ip_address)
-  join_string = (var.join_string != "" ? var.join_string : join(",", azurerm_network_interface.crdb_network_interface[*].private_ip_address))
-  prometheus_string = (var.prometheus_string != "" ? var.prometheus_string : join(",", formatlist("%s:8080", azurerm_network_interface.crdb_network_interface[*].private_ip_address)))
-}
-
 data "azurerm_ssh_public_key" "ssh_key" {
   name                = var.ssh_key_name
   resource_group_name = var.ssh_key_resource_group
@@ -20,7 +9,7 @@ resource "azurerm_public_ip" "crdb-ip" {
   location                     = var.virtual_network_location
   resource_group_name          = local.resource_group_name
   allocation_method            = "Static"
-  zones                        = [element(local.zones, count.index)]
+  zones                        = [element(local.app_zones, count.index)]
   sku                          = "Standard"
   tags                         = local.tags
 }
@@ -44,7 +33,7 @@ resource "azurerm_managed_disk" "data_disk" {
   count                = var.create_ec2_instances == "yes" ? var.crdb_nodes : 0
   name                 = "${var.owner}-${var.resource_name}-storagedisk-${count.index}"
   location             = var.virtual_network_location
-  zone                 = local.zones[count.index%3]
+  zone                 = local.app_zones[count.index%3]
   resource_group_name  = local.resource_group_name
   storage_account_type = "Premium_LRS"
   create_option        = "Empty"
@@ -70,7 +59,7 @@ resource "azurerm_linux_virtual_machine" "crdb-instance" {
   resource_group_name   = local.resource_group_name
   size                  = var.crdb_vm_size
   tags                  = local.tags
-  zone                  = local.zones[count.index%3]
+  zone                  = local.app_zones[count.index%3]
 
 
   network_interface_ids = [azurerm_network_interface.crdb_network_interface[count.index].id]

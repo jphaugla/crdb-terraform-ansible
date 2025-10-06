@@ -3,6 +3,11 @@
     src: system_locations.sql
     dest: system_locations.sql    
 
+- name: copy vector_enable.sql
+  copy:
+    src: vector_enable.sql
+    dest: vector_enable.sql
+
 - name: copy create user sql script
   template:
     src: create_user.j2
@@ -16,3 +21,7 @@
 - name: create admin user
   shell:
     cmd: "cockroach sql --certs-dir=certs --file=create_user.sql"
+
+- name: enable vector
+  shell:
+    cmd: "cockroach sql --certs-dir=certs --file=vector_enable.sql"

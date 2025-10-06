@@ -117,6 +117,7 @@ module "mymodule" {
 
   include_load_balancer  = "yes"
   run_ansible = false
+  enable_s3_iam = false
 
   # ────────────────────────────────────────────────────────────────────────────
   # 12. OPTIONAL TLS KEYS & CERTS

@@ -3,7 +3,7 @@ module "sg_application" {
   version = "4.17.1"
 
   name        = "${var.owner}-${var.project_name}-sg-application"
-  description = "Allow HTTP (8080, 8000) and App(3000) from trusted IPs"
+  description = "Allow HTTP (8080, 8000) and App(3000, 5000) from trusted IPs"
   vpc_id      = aws_vpc.main.id
   tags        = local.tags
 
@@ -25,6 +25,12 @@ module "sg_application" {
     {
       from_port   = 3000
       to_port     = 3000
+      protocol    = "tcp"
+      description = "Allow application port 3000 from trusted IPs"
+    },
+    {
+      from_port   = 5000
+      to_port     = 5000
       protocol    = "tcp"
       description = "Allow application port 3000 from trusted IPs"
     },

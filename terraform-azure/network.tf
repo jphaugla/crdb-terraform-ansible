@@ -1,9 +1,3 @@
-locals {
-  subnet_list = cidrsubnets(var.virtual_network_cidr,3,3,3,3,3,3)
-  private_subnet_list = chunklist(local.subnet_list,3)[0]
-  public_subnet_list  = chunklist(local.subnet_list,3)[1]
-}
-
 
 resource "azurerm_virtual_network" "vm01" {
   name                = "${var.owner}-${var.resource_name}-network"

@@ -19,3 +19,5 @@ node_version: "23.11.0"
 create_der_certs: true
 # change default to not start the java app
 start_java_app: false
+# python venv path
+py311_venv_path: /opt/py311

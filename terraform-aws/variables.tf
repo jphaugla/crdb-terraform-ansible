@@ -433,6 +433,11 @@
       default     = true
     }
 
+    variable "enable_s3_iam" {
+      type        = bool
+      description = "Whether to enable s3 iam policy"
+      default     = false
+    }
     variable "do_crdb_init" {
       type        = bool
       description = "run the crdb_init.  this is mainly for multi-region to only run in one region"

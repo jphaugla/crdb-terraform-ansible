@@ -9,9 +9,6 @@
 - name: create log directories
   include_tasks: create-dirs.yml
 
-- name: install python pip
-  include_tasks: install-python-pip.yml
-
 - name: install gcc and other packages - must be after python and pip
   include_tasks: install-packages.yml
 

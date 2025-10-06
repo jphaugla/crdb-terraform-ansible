@@ -1,6 +1,6 @@
 module "my_aws" {
    source      = "../"
-   my_ip_address = "174.141.204.193"
+   my_ip_address = "67.220.19.71"
    virtual_network_location = "us-east-2"
    owner = "jhaug"
    project_name = "east2"
@@ -17,7 +17,7 @@ module "my_aws" {
    crdb_instance_type = "t4g.xlarge"
    crdb_store_volume_type = "gp3"
    crdb_store_volume_size = 8
-   crdb_version = "25.2.0"
+   crdb_version = "25.3.2"
    crdb_arm_release = "yes"
    crdb_enable_spot_instances = "no"
    crdb_file_location         = "/mnt/data"
@@ -42,6 +42,8 @@ module "my_aws" {
    setup_migration           = "yes"
    dbadmin_user_name          = "jhaugland"
    dbadmin_user_password      = "jasonrocks"
+# s3
+   enable_s3_iam              = false
 # ----------------------------------------
 # Cluster Enterprise License Keys
 # ----------------------------------------
@@ -54,6 +56,6 @@ module "my_aws" {
 # Create Network load balancer
 # ----------------------------------------
    include_load_balancer           = "yes"
-   run_ansible                     = true
+   run_ansible                     = false
    do_crdb_init                    = true
 }
